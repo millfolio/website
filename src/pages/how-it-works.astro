@@ -1,0 +1,276 @@
+---
+const arch = "https://github.com/millrace/millrace/blob/main/ARCHITECTURE.md";
+const bench = "https://github.com/millrace/millrace/tree/main/bench";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>How it works — millrace</title>
+    <meta
+      name="description"
+      content="How millrace works under the hood: a from-scratch pure-Mojo GPU inference engine for Apple Silicon, the models it serves (Qwen2.5, Qwen3, Gemma 4), and how it compares to MLX."
+    />
+    <meta property="og:title" content="How millrace works" />
+    <meta
+      property="og:description"
+      content="The pure-Mojo inference engine, the models it serves, and how it compares to MLX — every GPU kernel hand-written, no C++/CUDA/Metal deps."
+    />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://millrace.app/how-it-works" />
+  </head>
+  <body>
+    <main>
+      <header class="top">
+        <a class="back" href="/">← millrace</a>
+        <a class="src" href="https://github.com/millrace">github.com/millrace ↗</a>
+      </header>
+
+      <section class="intro">
+        <span class="kicker">how it works</span>
+        <h1>How it works</h1>
+        <p class="lede">
+          A closer look at the <strong>inference engine</strong> — a from-scratch,
+          pure-Mojo GPU stack where every kernel is hand-written — the models it
+          serves, and how it compares to MLX.
+        </p>
+      </section>
+
+      <!-- ════════════════ inference server ════════════════ -->
+      <section class="prose" id="inference">
+        <h2>The inference engine</h2>
+        <p>
+          Most local-LLM stacks are a thin scripting layer over a C++/Metal core
+          (MLX) or a C/C++ engine (llama.cpp, via Ollama). millrace instead writes
+          the transformer forward pass — <strong>and every GPU kernel it runs
+          on</strong> — by hand in Mojo, on Apple's Metal GPU. No C++, no CUDA, no
+          hand-written Metal shaders, no Python or MAX on the request path. Socket
+          to logits, it's one language.
+        </p>
+
+        <h3>What's hand-written</h3>
+        <ul>
+          <li>
+            <strong>Every kernel.</strong> <code>embed</code>,
+            <code>rmsnorm</code>, <code>matmul</code> (<code>y = x·Wᵀ + b</code>),
+            <code>silu_mul</code>, and a fused <code>attn_cached</code> (RoPE +
+            causal grouped-query attention over the KV cache) — written in Mojo,
+            reaching Apple's <code>simdgroup_matrix</code> units through AIR
+            intrinsics.
+          </li>
+          <li>
+            <strong>The loader.</strong> A hand-written safetensors parser
+            <code>mmap</code>s the checkpoint and uploads tensors to GPU buffers —
+            verified bit-exact against torch. Weights live on-device as
+            <strong>bf16</strong>, or as group-128 <strong>int4</strong> for the
+            projection weights (~2× faster decode GEMVs, ~4× smaller, at coherent
+            quality).
+          </li>
+          <li>
+            <strong>The tokenizers + templates.</strong> Two BPE tokenizers —
+            Qwen's GPT-2-style byte-level and Gemma's SentencePiece-style, each
+            byte-identical to <code>transformers</code> — plus the real Qwen2.5 and
+            Gemma 4 chat templates (Qwen's via
+            <a href="https://github.com/millrace/jinja2.mojo">jinja2.mojo</a>,
+            Gemma's rendered in Mojo).
+          </li>
+          <li>
+            <strong>The server.</strong> An OpenAI-compatible HTTP API
+            (<code>/v1/chat/completions</code>, <code>/v1/responses</code>,
+            <code>/v1/embeddings</code>) on
+            <a href="https://github.com/millrace/flare">flare</a>'s reactor, with a
+            disk-backed prefix cache. One process serves a chat model and an
+            embedding model side by side.
+          </li>
+        </ul>
+        <p class="note">
+          Correctness is a hard gate at every step: the GPU's f32 output is diffed
+          against CPU/f32 references — HF per-kernel, MAX-on-CPU whole-model — to
+          <em>token-for-token parity</em> under greedy decoding. Full design in
+          <a href={arch}>ARCHITECTURE.md</a>.
+        </p>
+      </section>
+
+      <!-- ════════════════ models ════════════════ -->
+      <section class="prose" id="models">
+        <h2>The models</h2>
+        <p>
+          Three model families run on the same engine, behind one
+          OpenAI-compatible API:
+        </p>
+        <ul>
+          <li>
+            <strong>Qwen 2.5</strong> — the default chat model (0.5B and 3B,
+            auto-detected from the checkpoint), served on
+            <code>/v1/chat/completions</code> and <code>/v1/responses</code>.
+          </li>
+          <li>
+            <strong>Qwen 3</strong> — the Qwen3-Embedding model, served on
+            <code>/v1/embeddings</code> (last-token-pooled, L2-normalized), so one
+            process answers chat and embedding requests side by side.
+          </li>
+          <li>
+            <strong>Gemma 4</strong> — the 12B chat model (group-128 int4), with
+            its own SentencePiece tokenizer, sandwich norms, mixed sliding/full
+            attention, thinking channel, and tool calling — matched
+            token-for-token to <code>transformers</code>.
+          </li>
+        </ul>
+      </section>
+
+      <!-- ════════════════ performance ════════════════ -->
+      <section class="prose" id="performance">
+        <h2>Performance</h2>
+        <p>
+          What the engine <em>is</em> — pure Mojo, custom Metal kernels, no GPU
+          dependencies — versus the mature frameworks:
+        </p>
+
+        <table>
+          <thead>
+            <tr><th></th><th>millrace</th><th>MLX</th><th>Ollama / llama.cpp</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Implementation</td><td>pure Mojo</td><td>C++/Metal core, Python API</td><td>C/C++, Metal backend</td></tr>
+            <tr><td>GPU kernels</td><td><strong>custom Mojo</strong> (Metal via AIR)</td><td>MLX framework</td><td>llama.cpp shaders</td></tr>
+            <tr><td>GPU dependencies</td><td><strong>none</strong></td><td>MLX</td><td>llama.cpp</td></tr>
+            <tr><td>Weights</td><td>bf16 / group-128 int4</td><td>4-bit affine</td><td>GGUF (Q4_K_M…)</td></tr>
+          </tbody>
+        </table>
+
+        <p>
+          Chat-model throughput on an Apple M4, measured with the
+          <a href={bench}>bench harness</a> (two-point method, median of 5, one
+          engine resident at a time, temp 0). millrace is group-128 int4; MLX is
+          4-bit. <code>mlx_lm</code> does not support Gemma 4's architecture, so it
+          has no Gemma row.
+        </p>
+
+        <table>
+          <thead>
+            <tr><th>chat model</th><th>engine</th><th>decode tok/s</th><th>prefill (71 tok)</th><th>prefill (1570 tok)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Qwen2.5-3B</td><td>millrace int4</td><td>18.5</td><td>202 ms</td><td>5719 ms</td></tr>
+            <tr><td>Qwen2.5-3B</td><td>MLX 4-bit</td><td>51.7</td><td>221 ms</td><td>2798 ms</td></tr>
+            <tr><td>Gemma-4-12B</td><td>millrace int4</td><td>6.7</td><td>696 ms</td><td>25 060 ms</td></tr>
+            <tr><td>Gemma-4-12B</td><td>MLX</td><td>—</td><td>—</td><td>—</td></tr>
+          </tbody>
+        </table>
+
+        <p class="note">
+          That's the speed side. For the other half of the trade — how much
+          <strong>quality</strong> <code>int4</code> costs — see the deep dive on
+          <a href="/deep-dives/perplexity">measuring quality with perplexity</a>.
+        </p>
+      </section>
+
+      <footer>
+        <span>© millrace</span>
+        <span class="dot">·</span>
+        <a href="/server">the server →</a>
+        <span class="dot">·</span>
+        <a href="https://github.com/millrace">github.com/millrace ↗</a>
+      </footer>
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --bg-top: #284a5c;
+    --bg-bot: #122632;
+    --ink: #eaf1f6;
+    --muted: #9fb4c2;
+    --accent: #ff7a1c;
+    --accent-lite: #ffb05c;
+    --line: rgba(159, 180, 194, 0.18);
+    --card: rgba(255, 255, 255, 0.035);
+  }
+
+  * { box-sizing: border-box; }
+  html { color-scheme: dark; scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--ink);
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(255, 122, 28, 0.10), transparent 60%),
+      linear-gradient(180deg, var(--bg-top), var(--bg-bot));
+    background-attachment: fixed;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto,
+      Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--accent-lite); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  main { max-width: 760px; margin: 0 auto; padding: clamp(2rem, 5vw, 4rem) 1.5rem 3rem; }
+
+  .top { display: flex; justify-content: space-between; margin-bottom: 2rem; }
+  .back, .src { color: var(--muted); font-weight: 600; font-size: 0.95rem; }
+  .back:hover, .src:hover { color: var(--accent-lite); }
+
+  .kicker {
+    text-transform: uppercase; letter-spacing: 0.08em;
+    font-size: 0.78rem; font-weight: 700; color: var(--accent-lite);
+  }
+  h1 {
+    font-size: clamp(2rem, 6vw, 3rem); letter-spacing: -0.03em;
+    margin: 0.5rem 0 0; font-weight: 700;
+    background: linear-gradient(180deg, #ffffff, #cedae6);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .lede { margin: 1.2rem 0 0; color: var(--muted); font-size: 1.1rem; }
+  .lede strong, .prose strong, li strong { color: var(--ink); }
+
+  .prose { margin-top: clamp(2.5rem, 6vw, 3.5rem); scroll-margin-top: 1.5rem; }
+  .prose h2 {
+    font-size: 1.7rem; letter-spacing: -0.02em; margin: 0 0 0.8rem;
+    padding-bottom: 0.4rem; border-bottom: 1px solid var(--line);
+  }
+  .prose h3 { font-size: 1.15rem; margin: 1.8rem 0 0.4rem; color: var(--ink); }
+  .prose p { color: var(--muted); }
+  .prose ul { color: var(--muted); padding-left: 1.2rem; }
+  .prose li { margin: 0.55rem 0; }
+  .note { font-size: 0.95rem; }
+
+  table {
+    width: 100%; border-collapse: collapse; margin: 1.2rem 0;
+    font-size: 0.9rem;
+  }
+  th, td {
+    text-align: left; padding: 0.5rem 0.7rem;
+    border-bottom: 1px solid var(--line); color: var(--muted);
+  }
+  th { color: var(--ink); font-weight: 600; }
+  td:first-child { color: var(--ink); white-space: nowrap; }
+
+  pre {
+    background: rgba(0, 0, 0, 0.28); border: 1px solid var(--line);
+    border-radius: 10px; padding: 1rem 1.1rem; overflow-x: auto;
+    font-size: 0.82rem; line-height: 1.7; margin: 1.2rem 0;
+  }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.92em; }
+  p code, li code, .note code, td code {
+    background: rgba(255, 255, 255, 0.06); border: 1px solid var(--line);
+    border-radius: 5px; padding: 0.05rem 0.35rem; color: var(--ink);
+  }
+  pre code { background: none; border: 0; padding: 0; color: var(--ink); }
+  pre .c { color: var(--muted); }
+
+  footer {
+    margin-top: clamp(3rem, 8vw, 5rem); padding-top: 1.5rem;
+    border-top: 1px solid var(--line); text-align: center;
+    color: var(--muted); font-size: 0.9rem;
+  }
+  footer a { color: var(--muted); }
+  footer a:hover { color: var(--accent-lite); }
+  .dot { margin: 0 0.5rem; opacity: 0.5; }
+</style>

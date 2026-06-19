@@ -1,0 +1,328 @@
+---
+const repo = "https://github.com/millrace/millrace";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>The server — millrace</title>
+    <meta
+      name="description"
+      content="millrace's inference server: a from-scratch, pure-Mojo GPU engine for Qwen2.5 on Apple Silicon — every kernel hand-written, no C++/CUDA/Metal deps, served over an OpenAI-compatible API."
+    />
+    <meta property="og:title" content="The millrace server" />
+    <meta
+      property="og:description"
+      content="A from-scratch, pure-Mojo GPU inference engine for Qwen2.5 on Apple Silicon."
+    />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://millrace.app/server" />
+  </head>
+  <body>
+    <main>
+      <header class="top">
+        <a class="back" href="/">← millrace</a>
+        <a class="src" href={repo}>millrace ↗</a>
+      </header>
+
+      <section class="intro">
+        <span class="kicker">the inference server</span>
+        <h1>One language, socket to logits</h1>
+        <p class="lede">
+          The millrace server is a from-scratch, <strong>pure-Mojo GPU
+          inference engine</strong> for <strong>Qwen2.5</strong> (0.5B and 3B) on
+          Apple Silicon, served over an OpenAI-compatible HTTP API. Every GPU
+          kernel — matmul, attention, RMSNorm, RoPE, SwiGLU, the int4 dequant path
+          — is hand-written in Mojo, reaching Apple's <code>simdgroup_matrix</code>
+          units through AIR <code>external_call</code>. There are
+          <strong>no C++, CUDA, or Metal-shader GPU dependencies</strong>, and no
+          Python or MAX on the request path.
+        </p>
+      </section>
+
+      <!-- ── Goal ─────────────────────────────────────────────── -->
+      <section class="prose">
+        <h2>Goal</h2>
+        <p>
+          Own the whole inference path in <em>one</em> language. Most local-LLM
+          stacks are a thin scripting layer over a C++/Metal core (MLX) or a
+          C/C++ engine (llama.cpp via Ollama). millrace instead writes the
+          transformer forward pass — and every kernel it runs on — by hand in
+          Mojo, on Apple's Metal GPU, with a small, readable codebase.
+        </p>
+        <p>
+          It's a learning/research engine, and honest about the trade. The mature
+          frameworks are faster; on an M4 the 3B at 4-bit decodes ~18 tok/s vs
+          ~50 for MLX and Ollama. That gap — per-token Metal dispatch overhead on
+          decode, and a Mojo <code>simdgroup_matrix</code> ceiling on prefill GEMM
+          — is the interesting part, and it's documented with raw numbers rather
+          than hidden. The payoff is a stack with no external GPU libraries that
+          you can read end to end, and <strong>your data never leaves the
+          machine</strong>.
+        </p>
+      </section>
+
+      <!-- ── Design ───────────────────────────────────────────── -->
+      <section class="prose">
+        <h2>Design</h2>
+        <ul>
+          <li>
+            <strong>Pure Mojo, GPU-only.</strong> The forward pass runs entirely
+            on the Apple Silicon GPU through Mojo's native Metal backend — not
+            MLX, not MAX. There's no production CPU compute path.
+          </li>
+          <li>
+            <strong>No Python or MAX at runtime.</strong> Python appears only as a
+            <em>build-time reference oracle</em> for conformance, never on the
+            request path. Once the server is up, the whole path — sockets →
+            tokenizer → GPU model → JSON — is Mojo.
+          </li>
+          <li>
+            <strong>Hardcode first.</strong> Dimensions, layer counts, head
+            counts, RoPE base, and weight-tensor names are baked to the Qwen2
+            architecture (0.5B and 3B auto-detected from the checkpoint) — no
+            config-driven generality until one model is proven end to end.
+          </li>
+          <li>
+            <strong>Single-user, single-request.</strong> One prompt, one stream
+            of tokens; the reactor is single-threaded. Concurrency is future work.
+          </li>
+          <li>
+            <strong>Conformance against a trusted oracle.</strong> The GPU's f32
+            output is diffed against CPU/f32 references — HF transformers
+            per-kernel, MAX-on-CPU whole-model — so a mismatch points at a kernel,
+            not a dtype gap. The bar is <em>token-for-token parity</em> with the
+            reference under greedy decoding.
+          </li>
+          <li>
+            <strong>Risk-first.</strong> The roadmap proves the one kernel that
+            could sink a GPU-only engine — fused causal GQA attention + RoPE, the
+            exact kernel that returned garbage on a mature framework's own Metal
+            backend — <em>before</em> building the loader, tokenizer, and the rest.
+          </li>
+        </ul>
+      </section>
+
+      <!-- ── Implementation ───────────────────────────────────── -->
+      <section class="prose">
+        <h2>Implementation</h2>
+        <p>
+          The engine is a small Mojo library: GPU kernels in
+          <code>kernels.mojo</code>, the model in <code>model.mojo</code>, a
+          byte-level BPE tokenizer, chat templating, and the HTTP server.
+        </p>
+
+        <pre><code>prompt ─▶ jinja2.mojo template ─▶ BPE tokenizer ─▶ <span class="hl">Qwen2 model (GPU/Metal)</span> ─▶ tokenizer ─▶ text
+                                                  │  embed → N decoder layers → norm → tied LM head
+                                                  │  (RMSNorm · GQA attn + RoPE · SwiGLU · KV cache)
+                                          weight loader: safetensors ─▶ bf16 on device</code></pre>
+
+        <h3>The forward pass</h3>
+        <p>
+          Each decoder layer is the standard Qwen2/Llama pre-norm block: RMSNorm →
+          Q/K/V projections (Q/K/V carry a bias; Qwen2-specific) → RoPE →
+          causal grouped-query attention (7 query heads per KV head) → output
+          projection, then RMSNorm → SwiGLU MLP
+          (<code>down(silu(gate(x)) · up(x))</code>), each with a residual add.
+          The head reuses the embedding matrix as a tied LM head. The hand-written
+          Metal kernels: <code>embed</code>, <code>rmsnorm</code>,
+          <code>matmul</code> (<code>y = x·Wᵀ + b</code>), <code>silu_mul</code>,
+          and <code>attn_cached</code> (RoPE + causal GQA over the KV cache).
+        </p>
+
+        <h3>Loader, tokenizer, templating — all hand-written</h3>
+        <ul>
+          <li>
+            <strong>Weight loader:</strong> a hand-written safetensors header
+            parser <code>mmap</code>s the checkpoint and uploads tensors to GPU
+            device buffers — verified bit-exact against torch. Weights live
+            on-device as raw <strong>bf16</strong> and are widened per element
+            inside the kernels, halving weight bandwidth.
+          </li>
+          <li>
+            <strong>Tokenizer:</strong> GPT-2-style byte-level BPE that runs
+            entirely in integer id-space (the byte↔unicode map is a bijection, so
+            no Unicode handling in Mojo) — <em>byte-identical</em> to transformers
+            on an English corpus.
+          </li>
+          <li>
+            <strong>Chat templating:</strong> the real Qwen2.5 chat template is
+            rendered by <a href="https://github.com/millrace/jinja2.mojo">jinja2.mojo</a>,
+            a Jinja2-subset engine — verified <em>byte-identical</em> to
+            <code>transformers.apply_chat_template</code>, including a tools
+            request.
+          </li>
+        </ul>
+
+        <h3>Decode &amp; the KV cache</h3>
+        <p>
+          Prefill runs the whole prompt in one GPU pass; each step then appends one
+          position to a single-sequence, GPU-resident KV cache. Keys are RoPE-rotated
+          <em>once on write</em>, so a decode step costs O(positions), not O(T²).
+          Only token ids cross back to the host — tokenization and the argmax/sampler
+          stay on-device. Sampling (repetition penalty → temperature → top-k → top-p)
+          matches HF's logits processors; greedy is the default and the verifiable one.
+        </p>
+
+        <h3>int4 &amp; serving</h3>
+        <p>
+          Setting <code>QWEN_Q4=1</code> loads the projection weights as
+          <strong>group-128 int4</strong> (embedding/LM head stay bf16): on the 3B,
+          ~2× faster decode GEMVs and ~4× smaller projection weights at ~84% top-1
+          agreement with bf16. The OpenAI-compatible server runs on
+          <a href="https://github.com/millrace/flare">flare</a>'s kqueue reactor —
+          <code>GET /v1/models</code>, <code>POST /v1/chat/completions</code>, and
+          <code>POST /v1/responses</code>, with request params, a <code>usage</code>
+          block, and SSE streaming. <code>opencode</code> drives it directly.
+        </p>
+
+        <h3>Verified, every step</h3>
+        <p>
+          Each phase ships behind a conformance gate against the CPU oracle:
+          attention+RoPE matches to ≤ 8.4e-6, matmul is bit-exact, the tokenizer is
+          byte-identical, and end-to-end greedy generation is
+          <strong>token-for-token identical to HuggingFace</strong> — "What is the
+          capital of France?" → <code>The capital of France is Paris.</code>, all
+          eight ids matching. Kernel-optimization work (coalesced GEMV, warp-per-row
+          RMSNorm, flash-style attention, bf16-resident weights) took 0.5B decode
+          from ~11 to ~26 tok/s on an M4, with long context now <em>improving</em>
+          per-token throughput.
+        </p>
+      </section>
+
+      <footer>
+        <span>© millrace</span>
+        <span class="dot">·</span>
+        <a href={repo}>millrace</a>
+        <span class="dot">·</span>
+        <a href="/get-started">get started →</a>
+      </footer>
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --bg-top: #284a5c;
+    --bg-bot: #122632;
+    --ink: #eaf1f6;
+    --muted: #9fb4c2;
+    --accent: #ff7a1c;
+    --accent-lite: #ffb05c;
+    --line: rgba(159, 180, 194, 0.18);
+    --card: rgba(255, 255, 255, 0.035);
+    --card-hover: rgba(255, 255, 255, 0.07);
+  }
+
+  * { box-sizing: border-box; }
+  html { color-scheme: dark; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--ink);
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(255, 122, 28, 0.10), transparent 60%),
+      linear-gradient(180deg, var(--bg-top), var(--bg-bot));
+    background-attachment: fixed;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto,
+      Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--accent-lite); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: clamp(2rem, 5vw, 4rem) 1.5rem 3rem;
+  }
+
+  .top { display: flex; justify-content: space-between; margin-bottom: 2rem; }
+  .back, .src { color: var(--muted); font-weight: 600; font-size: 0.95rem; }
+  .back:hover, .src:hover { color: var(--accent-lite); }
+
+  .kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--accent-lite);
+  }
+
+  h1 {
+    font-size: clamp(2rem, 6vw, 3rem);
+    letter-spacing: -0.03em;
+    margin: 0.5rem 0 0;
+    font-weight: 700;
+    background: linear-gradient(180deg, #ffffff, #cedae6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .lede {
+    margin: 1.2rem 0 0;
+    color: var(--muted);
+    font-size: 1.1rem;
+  }
+  .lede strong, .prose strong, li strong { color: var(--ink); }
+
+  .prose { margin-top: clamp(2.5rem, 6vw, 3.5rem); }
+  .prose h2 {
+    font-size: 1.6rem;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.8rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .prose h3 {
+    font-size: 1.12rem;
+    margin: 1.8rem 0 0.4rem;
+    color: var(--ink);
+  }
+  .prose p { color: var(--muted); }
+  .prose ul { color: var(--muted); padding-left: 1.2rem; }
+  .prose li { margin: 0.55rem 0; }
+
+  pre {
+    background: rgba(0, 0, 0, 0.28);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    overflow-x: auto;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    margin: 1.2rem 0;
+  }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.92em;
+  }
+  p code, li code, h3 code {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: 0.05rem 0.35rem;
+    color: var(--ink);
+  }
+  pre code { background: none; border: 0; padding: 0; color: var(--muted); }
+  pre .hl { color: var(--accent-lite); font-weight: 600; }
+
+  footer {
+    margin-top: clamp(3rem, 8vw, 5rem);
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  footer a { color: var(--muted); }
+  footer a:hover { color: var(--accent-lite); }
+  .dot { margin: 0 0.5rem; opacity: 0.5; }
+</style>

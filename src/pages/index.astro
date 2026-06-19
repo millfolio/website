@@ -1,7 +1,7 @@
 ---
-// millfolio — placeholder landing. Marketing content from the millrace + veilens
-// sites gets merged in here later; for now this is a build-ready holding page so
-// the Cloudflare deploy + domain can be wired up.
+// millfolio landing. Deep content was merged from the millrace (engine) and
+// veilens (vault) sites; those inner pages still carry their original branding
+// and want an editorial rebrand pass. This landing is the millfolio surface.
 ---
 
 <html lang="en">
@@ -26,14 +26,34 @@
   <body>
     <main>
       <section class="hero">
-        <span class="kicker">coming soon</span>
+        <span class="kicker">private · on-device · yours</span>
         <h1>millfolio</h1>
         <p class="lede">
-          A private, on-device vault for the documents that are yours. Index your
+          A private vault for the documents that are yours. Index your
           <strong>PDFs, CSVs, and notes</strong> and ask open-ended questions —
           answered <strong>locally</strong>, your data never leaving the machine.
+          A frontier model writes the code that runs on your data; it never sees
+          the data itself.
         </p>
-        <p class="sub">Site under construction.</p>
+        <div class="cta">
+          <a class="btn primary" href="/get-started">Get started</a>
+          <a class="btn" href="/walkthrough">Walkthrough</a>
+        </div>
+      </section>
+
+      <section class="links">
+        <a class="card" href="/how-it-works">
+          <h3>How it works →</h3>
+          <p>The from-scratch, pure-Mojo inference engine underneath — every GPU kernel hand-written.</p>
+        </a>
+        <a class="card" href="/headgate">
+          <h3>The privacy harness →</h3>
+          <p>How a frontier model can help with your data without ever seeing it.</p>
+        </a>
+        <a class="card" href="/deep-dives/perplexity">
+          <h3>Measuring quality →</h3>
+          <p>How we quantify what int4 quantization costs, with perplexity.</p>
+        </a>
       </section>
 
       <footer>
@@ -54,15 +74,15 @@
     --accent: #ff7a1c;
     --accent-lite: #ffb05c;
     --line: rgba(159, 180, 194, 0.18);
+    --card: rgba(255, 255, 255, 0.035);
   }
 
   * { box-sizing: border-box; }
-  html { color-scheme: dark; }
+  html { color-scheme: dark; scroll-behavior: smooth; }
 
   body {
     margin: 0;
     min-height: 100vh;
-    display: flex;
     color: var(--ink);
     background:
       radial-gradient(1200px 600px at 50% -10%, rgba(255, 122, 28, 0.12), transparent 60%),
@@ -74,36 +94,48 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  main {
-    max-width: 640px;
-    margin: auto;
-    padding: clamp(2rem, 8vw, 5rem) 1.5rem;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
+  a { color: var(--accent-lite); text-decoration: none; }
+  a:hover { text-decoration: underline; }
 
-  .hero { margin: auto 0; }
+  main { max-width: 760px; margin: 0 auto; padding: clamp(2.5rem, 8vw, 5rem) 1.5rem 3rem; }
 
   .kicker {
     text-transform: uppercase; letter-spacing: 0.1em;
     font-size: 0.78rem; font-weight: 700; color: var(--accent-lite);
   }
   h1 {
-    font-size: clamp(2.6rem, 12vw, 4.5rem); letter-spacing: -0.04em;
+    font-size: clamp(2.6rem, 11vw, 4.5rem); letter-spacing: -0.04em;
     margin: 0.6rem 0 0; font-weight: 700;
     background: linear-gradient(180deg, #ffffff, #cedae6);
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  .lede { margin: 1.4rem 0 0; color: var(--muted); font-size: 1.2rem; max-width: 34ch; }
+  .lede { margin: 1.4rem 0 0; color: var(--muted); font-size: 1.2rem; max-width: 46ch; }
   .lede strong { color: var(--ink); }
-  .sub { margin-top: 1.6rem; color: var(--muted); font-size: 0.95rem; opacity: 0.8; }
 
-  a { color: var(--accent-lite); text-decoration: none; }
-  a:hover { text-decoration: underline; }
+  .cta { margin-top: 2rem; display: flex; gap: 0.8rem; flex-wrap: wrap; }
+  .btn {
+    display: inline-block; padding: 0.6rem 1.2rem; border-radius: 9px;
+    border: 1px solid var(--line); color: var(--ink); font-weight: 600;
+  }
+  .btn:hover { text-decoration: none; border-color: var(--accent-lite); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #1a1205; }
+  .btn.primary:hover { background: var(--accent-lite); border-color: var(--accent-lite); }
+
+  .links {
+    margin-top: clamp(3rem, 8vw, 4.5rem);
+    display: grid; gap: 0.9rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+  .card {
+    display: block; padding: 1.1rem 1.2rem; border-radius: 12px;
+    border: 1px solid var(--line); background: var(--card); color: var(--ink);
+  }
+  .card:hover { text-decoration: none; border-color: var(--accent-lite); }
+  .card h3 { margin: 0 0 0.3rem; font-size: 1.05rem; }
+  .card p { margin: 0; color: var(--muted); font-size: 0.92rem; line-height: 1.5; }
 
   footer {
-    margin-top: 3rem; padding-top: 1.4rem;
+    margin-top: clamp(3rem, 8vw, 5rem); padding-top: 1.4rem;
     border-top: 1px solid var(--line);
     color: var(--muted); font-size: 0.9rem;
   }

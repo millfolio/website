@@ -1,0 +1,260 @@
+---
+const gh = "https://github.com/millrace";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Measuring quality with perplexity — millrace</title>
+    <meta
+      name="description"
+      content="How millrace measures the quality cost of int4 quantization with perplexity: a held-out corpus, a teacher-forced forward through the real serving path, and a pure-Mojo eval harness."
+    />
+    <meta property="og:title" content="Measuring quality with perplexity" />
+    <meta
+      property="og:description"
+      content="Speed is easy to measure; quality isn't. How millrace quantifies what int4 costs, end to end, with perplexity."
+    />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://millrace.app/deep-dives/perplexity" />
+  </head>
+  <body>
+    <main>
+      <header class="top">
+        <a class="back" href="/how-it-works">← how it works</a>
+        <a class="src" href="https://github.com/millrace">github.com/millrace ↗</a>
+      </header>
+
+      <section class="intro">
+        <span class="kicker">deep dive</span>
+        <h1>Measuring quality with perplexity</h1>
+        <p class="lede">
+          Speed is easy to measure. <strong>Quality</strong> — how much you give up
+          when you run a model at <code>int4</code> instead of <code>bf16</code> —
+          is not. millrace measures it with <strong>perplexity</strong>, end to end,
+          through the same serving path a request takes.
+        </p>
+      </section>
+
+      <!-- ════════════════ what ════════════════ -->
+      <section class="prose" id="what">
+        <h2>What perplexity tells you</h2>
+        <p>
+          Perplexity (PPL) is how <em>surprised</em> a model is by real text it
+          didn't write. Feed it a held-out passage and, at every position, ask how
+          much probability it put on the word that actually came next. Average that
+          surprise and exponentiate it once:
+        </p>
+        <pre><code>PPL = exp( <span class="c">−</span> mean log P(token | preceding tokens) )</code></pre>
+        <p>
+          Lower is better. A model that confidently predicts the real next token
+          scores near the low single digits; one whose distribution is mushy or
+          wrong scores high. Crucially, PPL is sensitive to the whole probability
+          distribution, not just the top choice — so it catches quality loss that a
+          greedy "does it still answer correctly?" check sails right past. That makes
+          it the right tool for the question we actually care about:
+          <strong>how much does int4 cost?</strong>
+        </p>
+      </section>
+
+      <!-- ════════════════ how ════════════════ -->
+      <section class="prose" id="method">
+        <h2>How it's measured</h2>
+        <p>
+          The engine already speaks an OpenAI-compatible API, so scoring rides on it
+          directly. A <code>/v1/completions</code> request with
+          <code>echo</code> + <code>logprobs</code> runs a single teacher-forced
+          forward over the input and returns the log-probability of every token
+          given its context — no text generated, just the model's own confidence
+          read back out. A small GPU kernel gathers the per-token log-probs in one
+          pass, so the full <code>tokens × vocab</code> logit tensor never leaves the
+          GPU.
+        </p>
+        <ul>
+          <li>
+            <strong>Corpus.</strong> A held-out public-domain English text, split
+            into non-overlapping windows. The same corpus and windowing is used for
+            every model, so comparisons are apples-to-apples.
+          </li>
+          <li>
+            <strong>Aggregate once.</strong> Negative log-likelihood is summed across
+            the whole corpus and exponentiated a single time — not averaged
+            per-window — so long and short windows are weighted by their token count.
+          </li>
+          <li>
+            <strong>The real path.</strong> Scoring uses the production tokenizer,
+            forward pass, and KV session the server uses to answer chat — so the
+            number reflects what you'd actually deploy, and the measurement doubles
+            as a serving-stack regression test.
+          </li>
+        </ul>
+        <p class="note">
+          One subtlety: the score is <em>relative</em>. Each model is read through
+          its own tokenizer, so a model is strictly comparable to <em>itself</em>
+          (int4 vs bf16). Across different model families the numbers are a guide,
+          not a photo-finish ranking.
+        </p>
+      </section>
+
+      <!-- ════════════════ harness ════════════════ -->
+      <section class="prose" id="harness">
+        <h2>The harness</h2>
+        <p>
+          The whole loop is a small <strong>pure-Mojo</strong> tool, a sibling to the
+          engine. It downloads the corpus over <a href={gh}>flare</a>'s TLS client,
+          then for each model: launches the server on that checkpoint (one model
+          resident at a time — the GPU holds one), waits for the endpoint, scores
+          perplexity, and tears the process group down before the next. No Python on
+          the path.
+        </p>
+        <pre><code>pixi run assay                <span class="c"># download corpus, score every model</span>
+pixi run -- ./build/assay --only Qwen3-8B</code></pre>
+      </section>
+
+      <!-- ════════════════ results ════════════════ -->
+      <section class="prose" id="results">
+        <h2>What int4 costs</h2>
+        <p>
+          Perplexity on the held-out corpus, measured through the millrace serving
+          path. The <code>bf16</code> reference exists where the unquantized model
+          fits the GPU; the gap to it is the price of <code>int4</code>.
+        </p>
+
+        <table>
+          <thead>
+            <tr><th>chat model</th><th>engine</th><th>perplexity</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Qwen2.5-3B</td><td>bf16 (reference)</td><td>9.3</td></tr>
+            <tr><td>Qwen2.5-3B</td><td>millrace int4</td><td>13.6</td></tr>
+            <tr><td>Qwen3-8B</td><td>millrace int4</td><td>11.6</td></tr>
+            <tr><td>Qwen3-14B</td><td>millrace int4</td><td>8.9</td></tr>
+          </tbody>
+        </table>
+
+        <p>
+          Two things fall out. First, group-128 <code>int4</code> costs Qwen2.5-3B
+          about <strong>+46% perplexity</strong> versus bf16 (13.6 vs 9.3) — real,
+          and worth knowing when you trade it for the memory. Second, capacity still
+          wins: at the same int4, the bigger Qwen3 models score better
+          (14B&nbsp;8.9&nbsp;&lt;&nbsp;8B&nbsp;11.6&nbsp;&lt;&nbsp;3B&nbsp;13.6),
+          exactly as size predicts — a sanity check that the quantized models are
+          behaving like models, not like noise.
+        </p>
+        <p class="note">
+          Absolute numbers run higher than the familiar single-digit WikiText
+          figures because the windows are short and start cold, with no long running
+          context per token; the <em>deltas</em> are the signal. Quality validation
+          of the Gemma&nbsp;4 models is ongoing and not yet listed here.
+        </p>
+      </section>
+
+      <footer>
+        <span>© millrace</span>
+        <span class="dot">·</span>
+        <a href="/how-it-works">how it works →</a>
+        <span class="dot">·</span>
+        <a href="https://github.com/millrace">github.com/millrace ↗</a>
+      </footer>
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --bg-top: #284a5c;
+    --bg-bot: #122632;
+    --ink: #eaf1f6;
+    --muted: #9fb4c2;
+    --accent: #ff7a1c;
+    --accent-lite: #ffb05c;
+    --line: rgba(159, 180, 194, 0.18);
+    --card: rgba(255, 255, 255, 0.035);
+  }
+
+  * { box-sizing: border-box; }
+  html { color-scheme: dark; scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--ink);
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(255, 122, 28, 0.10), transparent 60%),
+      linear-gradient(180deg, var(--bg-top), var(--bg-bot));
+    background-attachment: fixed;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto,
+      Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--accent-lite); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  main { max-width: 760px; margin: 0 auto; padding: clamp(2rem, 5vw, 4rem) 1.5rem 3rem; }
+
+  .top { display: flex; justify-content: space-between; margin-bottom: 2rem; }
+  .back, .src { color: var(--muted); font-weight: 600; font-size: 0.95rem; }
+  .back:hover, .src:hover { color: var(--accent-lite); }
+
+  .kicker {
+    text-transform: uppercase; letter-spacing: 0.08em;
+    font-size: 0.78rem; font-weight: 700; color: var(--accent-lite);
+  }
+  h1 {
+    font-size: clamp(2rem, 6vw, 3rem); letter-spacing: -0.03em;
+    margin: 0.5rem 0 0; font-weight: 700;
+    background: linear-gradient(180deg, #ffffff, #cedae6);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .lede { margin: 1.2rem 0 0; color: var(--muted); font-size: 1.1rem; }
+  .lede strong, .prose strong, li strong { color: var(--ink); }
+
+  .prose { margin-top: clamp(2.5rem, 6vw, 3.5rem); scroll-margin-top: 1.5rem; }
+  .prose h2 {
+    font-size: 1.7rem; letter-spacing: -0.02em; margin: 0 0 0.8rem;
+    padding-bottom: 0.4rem; border-bottom: 1px solid var(--line);
+  }
+  .prose h3 { font-size: 1.15rem; margin: 1.8rem 0 0.4rem; color: var(--ink); }
+  .prose p { color: var(--muted); }
+  .prose ul { color: var(--muted); padding-left: 1.2rem; }
+  .prose li { margin: 0.55rem 0; }
+  .note { font-size: 0.95rem; }
+
+  table {
+    width: 100%; border-collapse: collapse; margin: 1.2rem 0;
+    font-size: 0.9rem;
+  }
+  th, td {
+    text-align: left; padding: 0.5rem 0.7rem;
+    border-bottom: 1px solid var(--line); color: var(--muted);
+  }
+  th { color: var(--ink); font-weight: 600; }
+  td:first-child { color: var(--ink); white-space: nowrap; }
+
+  pre {
+    background: rgba(0, 0, 0, 0.28); border: 1px solid var(--line);
+    border-radius: 10px; padding: 1rem 1.1rem; overflow-x: auto;
+    font-size: 0.82rem; line-height: 1.7; margin: 1.2rem 0;
+  }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.92em; }
+  p code, li code, .note code, td code {
+    background: rgba(255, 255, 255, 0.06); border: 1px solid var(--line);
+    border-radius: 5px; padding: 0.05rem 0.35rem; color: var(--ink);
+  }
+  pre code { background: none; border: 0; padding: 0; color: var(--ink); }
+  pre .c { color: var(--muted); }
+
+  footer {
+    margin-top: clamp(3rem, 8vw, 5rem); padding-top: 1.5rem;
+    border-top: 1px solid var(--line); text-align: center;
+    color: var(--muted); font-size: 0.9rem;
+  }
+  footer a { color: var(--muted); }
+  footer a:hover { color: var(--accent-lite); }
+  .dot { margin: 0 0.5rem; opacity: 0.5; }
+</style>
