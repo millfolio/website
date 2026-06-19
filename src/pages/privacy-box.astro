@@ -1,5 +1,5 @@
 ---
-const repo = "https://github.com/millfolio/headgate";
+const repo = "https://github.com/millfolio/privacy-box";
 ---
 
 <html lang="en">
@@ -8,31 +8,31 @@ const repo = "https://github.com/millfolio/headgate";
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
-    <title>headgate — millfolio</title>
+    <title>privacy-box — millfolio</title>
     <meta
       name="description"
-      content="headgate is a privacy harness: a frontier model writes code that runs on your private data locally, in a sandbox that can't phone home. The data never leaves the machine."
+      content="privacy-box is a privacy harness: a frontier model writes code that runs on your private data locally, in a sandbox that can't phone home. The data never leaves the machine."
     />
-    <meta property="og:title" content="headgate — the privacy harness" />
+    <meta property="og:title" content="privacy-box — the privacy harness" />
     <meta
       property="og:description"
       content="Use a frontier model to write code that runs on private data locally — the data never leaves the machine."
     />
     <meta property="og:type" content="article" />
-    <meta property="og:url" content="https://millfolio.com/headgate" />
+    <meta property="og:url" content="https://millfolio.com/privacy-box" />
   </head>
   <body>
     <main>
       <header class="top">
         <a class="back" href="/">← millfolio</a>
-        <a class="src" href={repo}>headgate ↗</a>
+        <a class="src" href={repo}>privacy-box ↗</a>
       </header>
 
       <section class="intro">
         <span class="kicker">the privacy harness · experimental</span>
         <h1>The remote model writes code, not reads data</h1>
         <p class="lede">
-          A <em>headgate</em> is the gate at the intake of a millfolio that controls
+          A <em>privacy-box</em> is the gate at the intake of a millfolio that controls
           how much water enters the channel. This one is the controlled intake on
           the data: it lets a powerful <strong>remote model do the thinking while
           your private data stays on your side of the gate</strong>. The frontier
@@ -41,7 +41,7 @@ const repo = "https://github.com/millfolio/headgate";
           writes code; the code runs locally, in a sandbox, against the real data.
         </p>
         <p class="experimental">
-          ⚠︎ <strong>Experimental.</strong> headgate is an early research
+          ⚠︎ <strong>Experimental.</strong> privacy-box is an early research
           experiment — the design, threat model, and APIs are still moving and it
           isn't ready to trust with data that actually matters yet.
         </p>
@@ -54,12 +54,12 @@ const repo = "https://github.com/millfolio/headgate";
           You have private data and a small, capable <strong>local model</strong>
           (served by the millfolio <a href="https://millfolio.com/server">inference server</a>). The
           local model can reason over your data, but some tasks need a frontier
-          model's code-generation ability. Rather than ship the data out, headgate
+          model's code-generation ability. Rather than ship the data out, privacy-box
           flips the relationship: the remote model receives a <em>sanitized
           schema</em> and writes code; that code executes locally and the results
           stay local. <strong>The data never crosses the gate.</strong>
         </p>
-        <pre><code>          ┌──────────────────── headgate ─────────────────────┐
+        <pre><code>          ┌──────────────────── privacy-box ─────────────────────┐
           │ orchestrator · schema sanitizer · egress guard ·   │
           │ remote codegen client · code sandbox (containment) │
           └────┬───────────────────────────────────────┬───────┘
@@ -80,7 +80,7 @@ const repo = "https://github.com/millfolio/headgate";
           party and the private party — never data. Two roles stay strictly
           separate: the <em>model runner</em> (the local inference server, which
           stays harness-agnostic behind the OpenAI API) and the <em>code runner</em>
-          (the sandbox inside headgate that executes the remote model's generated
+          (the sandbox inside privacy-box that executes the remote model's generated
           code over real data).
         </p>
         <h3>Threat model: the careful SaaS provider</h3>
@@ -102,7 +102,7 @@ const repo = "https://github.com/millfolio/headgate";
             never self-emitted.
           </li>
           <li>
-            <strong>Confidentiality</strong> — owned by headgate: nothing sent to
+            <strong>Confidentiality</strong> — owned by privacy-box: nothing sent to
             the remote model contains real data. Enforced by schema sanitization +
             an egress guard, and by debugging against <em>synthetic</em> data shaped
             like the real schema — the real data is touched only on a final run
@@ -111,7 +111,7 @@ const repo = "https://github.com/millfolio/headgate";
         </ul>
         <p class="principles">
           Guiding principles: <strong>mechanism vs. policy</strong> (the inference
-          server and the sandbox are mechanism; headgate is confidentiality policy
+          server and the sandbox are mechanism; privacy-box is confidentiality policy
           on top); <strong>sanitize the schema, not just the values</strong>
           (column/table names leak on their own, so they're aliased and mapped back
           locally); and <strong>no silent leaks</strong> (the egress guard fails
@@ -123,7 +123,7 @@ const repo = "https://github.com/millfolio/headgate";
       <section class="prose">
         <h2>Implementation</h2>
         <p>
-          headgate is written in Mojo, in pi-shaped layers — a thin transport
+          privacy-box is written in Mojo, in pi-shaped layers — a thin transport
           chokepoint and core loop over a confidentiality policy over the
           containment sandbox. The flow for one task:
         </p>
@@ -183,7 +183,7 @@ const repo = "https://github.com/millfolio/headgate";
           A token budget caps spend on the frontier model (charged from the API's
           <code>usage</code>). Once depleted — or when there's no API key at all —
           codegen and fixes route to the <strong>local model</strong> instead of
-          failing: trusted, free, lower quality. So headgate degrades gracefully to
+          failing: trusted, free, lower quality. So privacy-box degrades gracefully to
           a fully local, fully private mode rather than stopping.
         </p>
       </section>
@@ -191,7 +191,7 @@ const repo = "https://github.com/millfolio/headgate";
       <footer>
         <span>© millfolio</span>
         <span class="dot">·</span>
-        <a href={repo}>headgate</a>
+        <a href={repo}>privacy-box</a>
         <span class="dot">·</span>
         <a href="/walkthrough">try the walkthrough →</a>
       </footer>
