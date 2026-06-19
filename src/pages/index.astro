@@ -1,0 +1,113 @@
+---
+// millfolio — placeholder landing. Marketing content from the millrace + veilens
+// sites gets merged in here later; for now this is a build-ready holding page so
+// the Cloudflare deploy + domain can be wired up.
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>millfolio — your private document vault</title>
+    <meta
+      name="description"
+      content="millfolio is a private, on-device vault for your own documents — index your PDFs, CSVs, and notes and ask open-ended questions, answered locally. Your data never leaves the machine."
+    />
+    <meta property="og:title" content="millfolio" />
+    <meta
+      property="og:description"
+      content="A private, on-device vault for your documents. Ask questions about your own files — answered locally, your data never leaving the machine."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://millfolio.com" />
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <span class="kicker">coming soon</span>
+        <h1>millfolio</h1>
+        <p class="lede">
+          A private, on-device vault for the documents that are yours. Index your
+          <strong>PDFs, CSVs, and notes</strong> and ask open-ended questions —
+          answered <strong>locally</strong>, your data never leaving the machine.
+        </p>
+        <p class="sub">Site under construction.</p>
+      </section>
+
+      <footer>
+        <span>© millfolio</span>
+        <span class="dot">·</span>
+        <a href="https://github.com/millfolio">github.com/millfolio ↗</a>
+      </footer>
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --bg-top: #284a5c;
+    --bg-bot: #122632;
+    --ink: #eaf1f6;
+    --muted: #9fb4c2;
+    --accent: #ff7a1c;
+    --accent-lite: #ffb05c;
+    --line: rgba(159, 180, 194, 0.18);
+  }
+
+  * { box-sizing: border-box; }
+  html { color-scheme: dark; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    color: var(--ink);
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(255, 122, 28, 0.12), transparent 60%),
+      linear-gradient(180deg, var(--bg-top), var(--bg-bot));
+    background-attachment: fixed;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto,
+      Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  main {
+    max-width: 640px;
+    margin: auto;
+    padding: clamp(2rem, 8vw, 5rem) 1.5rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .hero { margin: auto 0; }
+
+  .kicker {
+    text-transform: uppercase; letter-spacing: 0.1em;
+    font-size: 0.78rem; font-weight: 700; color: var(--accent-lite);
+  }
+  h1 {
+    font-size: clamp(2.6rem, 12vw, 4.5rem); letter-spacing: -0.04em;
+    margin: 0.6rem 0 0; font-weight: 700;
+    background: linear-gradient(180deg, #ffffff, #cedae6);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .lede { margin: 1.4rem 0 0; color: var(--muted); font-size: 1.2rem; max-width: 34ch; }
+  .lede strong { color: var(--ink); }
+  .sub { margin-top: 1.6rem; color: var(--muted); font-size: 0.95rem; opacity: 0.8; }
+
+  a { color: var(--accent-lite); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  footer {
+    margin-top: 3rem; padding-top: 1.4rem;
+    border-top: 1px solid var(--line);
+    color: var(--muted); font-size: 0.9rem;
+  }
+  footer a { color: var(--muted); }
+  footer a:hover { color: var(--accent-lite); }
+  .dot { margin: 0 0.5rem; opacity: 0.5; }
+</style>
