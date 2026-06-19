@@ -1,6 +1,6 @@
 ---
-const cliRepo = "https://github.com/veilensapp/cli";
-const repo = "https://github.com/veilensapp/veilens";
+const cliRepo = "https://github.com/millfolio/cli";
+const repo = "https://github.com/millfolio/millfolio";
 ---
 
 <html lang="en">
@@ -9,35 +9,35 @@ const repo = "https://github.com/veilensapp/veilens";
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
-    <title>Get started — veilens</title>
+    <title>Get started — millfolio</title>
     <meta
       name="description"
-      content="Install veilens on Apple Silicon — index a folder of your own documents and ask open-ended questions, answered locally. The veilens CLI via Homebrew."
+      content="Install millfolio on Apple Silicon — index a folder of your own documents and ask open-ended questions, answered locally. The millfolio CLI via Homebrew."
     />
-    <meta property="og:title" content="Get started with veilens" />
+    <meta property="og:title" content="Get started with millfolio" />
     <meta
       property="og:description"
-      content="Install veilens on Apple Silicon — index your own documents and ask questions, answered locally."
+      content="Install millfolio on Apple Silicon — index your own documents and ask questions, answered locally."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://veilens.app/get-started" />
+    <meta property="og:url" content="https://millfolio.com/get-started" />
   </head>
   <body>
     <main>
       <header class="top">
-        <a class="back" href="/">← veilens</a>
-        <a class="src" href={repo}>veilens ↗</a>
+        <a class="back" href="/">← millfolio</a>
+        <a class="src" href={repo}>millfolio ↗</a>
       </header>
 
       <section class="intro">
         <h1>Get started</h1>
         <p class="lede">
-          veilens runs entirely on your Mac (Apple Silicon). Install it with the
-          <strong><code>veilens</code> CLI</strong> via Homebrew, then point it at
+          millfolio runs entirely on your Mac (Apple Silicon). Install it with the
+          <strong><code>millfolio</code> CLI</strong> via Homebrew, then point it at
           a folder of documents. Your data never leaves the machine.
         </p>
         <p class="experimental">
-          ⚠︎ <strong>Experimental.</strong> veilens is an early research project —
+          ⚠︎ <strong>Experimental.</strong> millfolio is an early research project —
           not ready to trust with data that truly matters yet.
         </p>
       </section>
@@ -50,17 +50,17 @@ const repo = "https://github.com/veilensapp/veilens";
             <h2>CLI (Homebrew)</h2>
           </div>
           <p>Note: XCode is required, including Metal extensions `xcodebuild -downloadComponent MetalToolchain`</p>
-          <p>Install the <code>veilens</code> CLI from the tap:</p>
-          <pre><code>brew install veilensapp/tap/veilens</code></pre>
+          <p>Install the <code>millfolio</code> CLI from the tap:</p>
+          <pre><code>brew install millfolioapp/tap/millfolio</code></pre>
           <p>Then set up the vault and ask:</p>
           <pre><code><span class="c"># engine + weights + headgate + the local site (one time)</span>
-veilens install
-veilens index ~/vault   <span class="c"># embed your documents on-device</span>
-veilens start           <span class="c"># http://localhost:10000</span>
-veilens stop            <span class="c"># shut it all down when you're done</span>
+mill install
+mill index ~/vault   <span class="c"># embed your documents on-device</span>
+mill start           <span class="c"># http://localhost:10000</span>
+mill stop            <span class="c"># shut it all down when you're done</span>
 
 <span class="c"># or one-shot from the terminal:</span>
-veilens ask "When does my car insurance renew?"</code></pre>
+mill ask "When does my car insurance renew?"</code></pre>
         </article>
 
       </section>
@@ -69,11 +69,11 @@ veilens ask "When does my car insurance renew?"</code></pre>
         <h2>Requirements</h2>
         <ul>
           <li>A Mac with <strong>Apple Silicon</strong> (M-series), macOS 14+.</li>
-          <li>The first <code>veilens install</code> downloads several GB of model weights.</li>
+          <li>The first <code>mill install</code> downloads several GB of model weights.</li>
           <li>
             A frontier-model API key (Anthropic) for the code-generation step —
             <strong>optional</strong>: with no key, or once a token budget is
-            spent, veilens falls back to the local model. Trusted, free, lower
+            spent, millfolio falls back to the local model. Trusted, free, lower
             quality — never a hard stop.
           </li>
         </ul>
@@ -83,17 +83,17 @@ veilens ask "When does my car insurance renew?"</code></pre>
           explains why your data stays private.
         </p>
         <div class="cta">
-          <a class="btn primary" href={cliRepo}>View veilens on GitHub</a>
+          <a class="btn primary" href={cliRepo}>View millfolio on GitHub</a>
           <a class="btn" href={repo}>Source &amp; docs</a>
         </div>
       </section>
 
       <footer>
-        <span>© veilens</span>
+        <span>© millfolio</span>
         <span class="dot">·</span>
-        <a href="https://github.com/veilensapp">github.com/veilensapp</a>
+        <a href="https://github.com/millfolio">github.com/millfolio</a>
         <span class="dot">·</span>
-        <span>runs on <a href="https://millrace.app">millrace</a></span>
+        <span>runs on <a href="https://millfolio.com">millfolio</a></span>
       </footer>
     </main>
   </body>

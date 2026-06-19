@@ -1,6 +1,6 @@
 ---
-const sysPrompt = "https://github.com/veilensapp/headgate/blob/main/resources/headgate-system.md";
-const repo = "https://github.com/veilensapp/headgate";
+const sysPrompt = "https://github.com/millfolio/headgate/blob/main/resources/headgate-system.md";
+const repo = "https://github.com/millfolio/headgate";
 ---
 
 <html lang="en">
@@ -9,23 +9,23 @@ const repo = "https://github.com/veilensapp/headgate";
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
-    <title>Deep dive — veilens</title>
+    <title>Deep dive — millfolio</title>
     <meta
       name="description"
-      content="How veilens works under the hood: a question becomes a sandboxed program the frontier model writes but never gets to run against your data — with the actual generated Mojo."
+      content="How millfolio works under the hood: a question becomes a sandboxed program the frontier model writes but never gets to run against your data — with the actual generated Mojo."
     />
-    <meta property="og:title" content="veilens deep dive" />
+    <meta property="og:title" content="millfolio deep dive" />
     <meta
       property="og:description"
       content="A question becomes a program — frontier writes the code, your data stays home."
     />
     <meta property="og:type" content="article" />
-    <meta property="og:url" content="https://veilens.app/deep-dives" />
+    <meta property="og:url" content="https://millfolio.com/deep-dives" />
   </head>
   <body>
     <main>
       <header class="top">
-        <a class="back" href="/">← veilens</a>
+        <a class="back" href="/">← millfolio</a>
         <a class="src" href={repo}>headgate ↗</a>
       </header>
 
@@ -33,7 +33,7 @@ const repo = "https://github.com/veilensapp/headgate";
         <span class="kicker">deep dive</span>
         <h1>A question becomes a program</h1>
         <p class="lede">
-          veilens lets a powerful <strong>remote</strong> model help with your
+          millfolio lets a powerful <strong>remote</strong> model help with your
           private data without ever seeing it. The trick — the
           <a href="/headgate">headgate</a> harness — is to treat the frontier
           model as an <strong>untrusted code generator, not a data
@@ -62,7 +62,7 @@ const repo = "https://github.com/veilensapp/headgate";
             reader. When the program needs to understand content — "is this a
             travel expense?", "read the renewal date" — it calls
             <code>ask_local(...)</code>, which runs on the
-            <a href="https://millrace.app/server">millrace inference engine</a> and
+            <a href="https://millfolio.com/server">millfolio inference engine</a> and
             is the only thing that ever sees real text.
           </li>
         </ul>
@@ -117,11 +117,11 @@ def main() raises:
       </section>
 
       <footer>
-        <span>© veilens</span>
+        <span>© millfolio</span>
         <span class="dot">·</span>
         <a href="/headgate">headgate →</a>
         <span class="dot">·</span>
-        <a href="https://millrace.app">runs on millrace ↗</a>
+        <a href="https://millfolio.com">runs on millfolio ↗</a>
       </footer>
     </main>
   </body>

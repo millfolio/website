@@ -3,31 +3,31 @@ const tools = [
   {
     name: "jinja2.mojo",
     desc: "A minimal implementation of Jinja2 in Mojo — used to render the Qwen2.5 chat template byte-identically to transformers.apply_chat_template.",
-    href: "https://github.com/millrace/jinja2.mojo",
+    href: "https://github.com/millfolio/jinja2.mojo",
     tag: "templating",
   },
   {
     name: "zlib.mojo",
     desc: "A Mojo zlib binding (inflate/deflate) via a thin C shim to libz. Powers PDF /FlateDecode in pdftotext.mojo and general decompression.",
-    href: "https://github.com/millrace/zlib.mojo",
+    href: "https://github.com/millfolio/zlib.mojo",
     tag: "compression",
   },
   {
     name: "pdftotext.mojo",
     desc: "A pure-Mojo PDF text extractor — object map, page-tree walk, content-stream text ops, and /ToUnicode CMap decoding. Pulls clean text out of PDFs for document pipelines.",
-    href: "https://github.com/millrace/pdftotext.mojo",
+    href: "https://github.com/millfolio/pdftotext.mojo",
     tag: "pdf",
   },
   {
     name: "lancedb.mojo",
     desc: "A Mojo binding for the LanceDB vector store via a small Rust cdylib over a C ABI. An on-device vector index for embedding search.",
-    href: "https://github.com/millrace/lancedb.mojo",
+    href: "https://github.com/millfolio/lancedb.mojo",
     tag: "vector store",
   },
   {
     name: "csv.mojo",
     desc: "A from-scratch RFC-4180 CSV parser in Mojo — quoted fields, embedded commas/newlines, escaped quotes, UTF-8-safe. General-purpose CSV parsing.",
-    href: "https://github.com/millrace/csv.mojo",
+    href: "https://github.com/millfolio/csv.mojo",
     tag: "parsing",
   },
 ];
@@ -39,24 +39,24 @@ const tools = [
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
-    <title>Tools — millrace</title>
+    <title>Tools — millfolio</title>
     <meta
       name="description"
-      content="The small, single-purpose Mojo libraries millrace builds and maintains — chat templating, compression, PDF extraction, and an on-device vector store — plus the flare networking stack we build on."
+      content="The small, single-purpose Mojo libraries millfolio builds and maintains — chat templating, compression, PDF extraction, and an on-device vector store — plus the flare networking stack we build on."
     />
-    <meta property="og:title" content="millrace tools" />
+    <meta property="og:title" content="millfolio tools" />
     <meta
       property="og:description"
-      content="The small, single-purpose Mojo libraries millrace builds and maintains, plus the flare networking stack we build on."
+      content="The small, single-purpose Mojo libraries millfolio builds and maintains, plus the flare networking stack we build on."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://millrace.app/tools" />
+    <meta property="og:url" content="https://millfolio.com/tools" />
   </head>
   <body>
     <main>
       <header class="top">
-        <a class="back" href="/">← millrace</a>
-        <a class="src" href="https://github.com/millrace">github.com/millrace ↗</a>
+        <a class="back" href="/">← millfolio</a>
+        <a class="src" href="https://github.com/millfolio">github.com/millfolio ↗</a>
       </header>
 
       <section class="intro">
@@ -91,16 +91,16 @@ const tools = [
           <a href="https://github.com/ehsanmok/flare">flare</a>, a full
           networking stack for Mojo (HTTP/1.1 and HTTP/2, WebSocket, TLS, TCP/UDP)
           on a single non-blocking reactor. We build on flare and maintain a
-          <a href="https://github.com/millrace/flare">fork at
-          <code>millrace/flare</code></a> to track the nightly Mojo dialect and
+          <a href="https://github.com/millfolio/flare">fork at
+          <code>millfolio/flare</code></a> to track the nightly Mojo dialect and
           the FFI fixes our shims depend on, upstreaming where we can.
         </p>
       </section>
 
       <footer>
-        <span>© millrace</span>
+        <span>© millfolio</span>
         <span class="dot">·</span>
-        <a href="https://github.com/millrace">github.com/millrace</a>
+        <a href="https://github.com/millfolio">github.com/millfolio</a>
         <span class="dot">·</span>
         <a href="/">← home</a>
       </footer>

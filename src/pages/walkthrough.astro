@@ -1,6 +1,6 @@
 ---
-const samples = "https://github.com/veilensapp/veilens/tree/main/examples/vault";
-const tap = "brew install veilensapp/tap/veilens";
+const samples = "https://github.com/millfolio/millfolio/tree/main/examples/vault";
+const tap = "brew install millfolioapp/tap/millfolio";
 ---
 
 <html lang="en">
@@ -9,31 +9,31 @@ const tap = "brew install veilensapp/tap/veilens";
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
-    <title>Ask your documents — veilens walkthrough</title>
+    <title>Ask your documents — millfolio walkthrough</title>
     <meta
       name="description"
       content="A start-to-finish walkthrough: index your own bank statements and ask questions about them — answered entirely on your Mac, with the data never leaving the machine."
     />
-    <meta property="og:title" content="Ask your own documents — veilens" />
+    <meta property="og:title" content="Ask your own documents — millfolio" />
     <meta
       property="og:description"
       content="Index your bank statements and ask questions about them, answered locally. A start-to-finish walkthrough."
     />
     <meta property="og:type" content="article" />
-    <meta property="og:url" content="https://veilens.app/walkthrough" />
+    <meta property="og:url" content="https://millfolio.com/walkthrough" />
   </head>
   <body>
     <main>
       <header class="top">
-        <a class="back" href="/">← veilens</a>
-        <a class="src" href="https://github.com/veilensapp/veilens">veilens ↗</a>
+        <a class="back" href="/">← millfolio</a>
+        <a class="src" href="https://github.com/millfolio/millfolio">millfolio ↗</a>
       </header>
 
       <section class="intro">
         <span class="kicker">walkthrough · experimental</span>
         <h1>Summarize and query your own bank statements</h1>
         <p class="lede">
-          A start-to-finish example of the <a href="https://github.com/veilensapp/veilens">veilens</a>
+          A start-to-finish example of the <a href="https://github.com/millfolio/millfolio">millfolio</a>
           vault: drop a folder of PDFs on your Mac, index them, and ask
           open-ended questions — <strong>"how much did I spend on travel last
           year?", "when does my insurance renew?"</strong> — answered by a
@@ -65,8 +65,8 @@ const tap = "brew install veilensapp/tap/veilens";
             <a href={samples}>sample vault</a> — a few fictional statements, an
             insurance policy, and a vehicle registration:
           </p>
-          <pre><code>git clone https://github.com/veilensapp/veilens
-cp veilens/examples/vault/*.pdf ~/vault</code></pre>
+          <pre><code>git clone https://github.com/millfolio/millfolio
+cp millfolio/examples/vault/*.pdf ~/vault</code></pre>
         </div>
       </section>
 
@@ -74,9 +74,9 @@ cp veilens/examples/vault/*.pdf ~/vault</code></pre>
       <section class="step">
         <div class="num">2</div>
         <div class="body">
-          <h2>Install veilens</h2>
+          <h2>Install millfolio</h2>
           <p>
-            Install the <strong><code>veilens</code> CLI</strong> via Homebrew:
+            Install the <strong><code>millfolio</code> CLI</strong> via Homebrew:
           </p>
           <pre><code>{tap}</code></pre>
         </div>
@@ -91,13 +91,13 @@ cp veilens/examples/vault/*.pdf ~/vault</code></pre>
             One command installs the whole stack — the inference server (a
             <strong>chat model</strong> that reads your documents and an
             <strong>embedding model</strong> for search, both served from one
-            port), the <a href="/headgate">headgate</a> harness, and the veilens vault —
+            port), the <a href="/headgate">headgate</a> harness, and the millfolio vault —
             reusing anything already installed:
           </p>
-          <pre><code>veilens install</code></pre>
+          <pre><code>mill install</code></pre>
           <p class="note">
-            veilens bundles everything it needs — the
-            <a href="https://millrace.app/server">millrace inference server</a>,
+            millfolio bundles everything it needs — the
+            <a href="https://millfolio.com/server">millfolio inference server</a>,
             the headgate harness, and the local vault site — installing each only
             if it isn't already there.
           </p>
@@ -110,14 +110,14 @@ cp veilens/examples/vault/*.pdf ~/vault</code></pre>
         <div class="body">
           <h2>Index your vault</h2>
           <p>
-            Point veilens at your folder. It chunks each file, embeds the chunks
+            Point millfolio at your folder. It chunks each file, embeds the chunks
             locally, and stores the vectors in an on-device
-            <a href="https://github.com/millrace/lancedb.mojo">LanceDB</a> index —
+            <a href="https://github.com/millfolio/lancedb.mojo">LanceDB</a> index —
             only you ever see the contents:
           </p>
-          <pre><code>veilens index ~/vault</code></pre>
+          <pre><code>mill index ~/vault</code></pre>
           <p class="note">
-            veilens's <strong>manifest</strong> is the only thing the frontier
+            millfolio's <strong>manifest</strong> is the only thing the frontier
             model is ever shown — aliases like <code>file_0 [pdf]</code> and
             <code>col_2</code>, never names, values, or paths.
           </p>
@@ -135,11 +135,11 @@ cp veilens/examples/vault/*.pdf ~/vault</code></pre>
             writes a small program that searches your vault and reads the real
             text with the on-device model; the answer is computed locally.
           </p>
-          <pre><code>veilens start       <span class="c"># opens http://localhost:10000</span></code></pre>
+          <pre><code>mill start       <span class="c"># opens http://localhost:10000</span></code></pre>
           <p>Prefer the terminal? A one-shot:</p>
-          <pre><code>veilens ask "When does my car insurance renew?"</code></pre>
+          <pre><code>mill ask "When does my car insurance renew?"</code></pre>
           <pre class="out"><code>Your car insurance renews on 2026-09-15.</code></pre>
-          <p class="note">Done for the day? <code>veilens stop</code> shuts the
+          <p class="note">Done for the day? <code>mill stop</code> shuts the
           whole stack back down.</p>
         </div>
       </section>
@@ -159,9 +159,9 @@ cp veilens/examples/vault/*.pdf ~/vault</code></pre>
       </section>
 
       <footer>
-        <span>© veilens</span>
+        <span>© millfolio</span>
         <span class="dot">·</span>
-        <a href="https://github.com/veilensapp/veilens">veilens</a>
+        <a href="https://github.com/millfolio/millfolio">millfolio</a>
         <span class="dot">·</span>
         <a href="/headgate">how the harness works →</a>
       </footer>

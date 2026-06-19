@@ -1,5 +1,5 @@
 ---
-const gh = "https://github.com/millrace";
+const gh = "https://github.com/millfolio";
 ---
 
 <html lang="en">
@@ -8,24 +8,24 @@ const gh = "https://github.com/millrace";
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
-    <title>Measuring quality with perplexity — millrace</title>
+    <title>Measuring quality with perplexity — millfolio</title>
     <meta
       name="description"
-      content="How millrace measures the quality cost of int4 quantization with perplexity: a held-out corpus, a teacher-forced forward through the real serving path, and a pure-Mojo eval harness."
+      content="How millfolio measures the quality cost of int4 quantization with perplexity: a held-out corpus, a teacher-forced forward through the real serving path, and a pure-Mojo eval harness."
     />
     <meta property="og:title" content="Measuring quality with perplexity" />
     <meta
       property="og:description"
-      content="Speed is easy to measure; quality isn't. How millrace quantifies what int4 costs, end to end, with perplexity."
+      content="Speed is easy to measure; quality isn't. How millfolio quantifies what int4 costs, end to end, with perplexity."
     />
     <meta property="og:type" content="article" />
-    <meta property="og:url" content="https://millrace.app/deep-dives/perplexity" />
+    <meta property="og:url" content="https://millfolio.com/deep-dives/perplexity" />
   </head>
   <body>
     <main>
       <header class="top">
         <a class="back" href="/how-it-works">← how it works</a>
-        <a class="src" href="https://github.com/millrace">github.com/millrace ↗</a>
+        <a class="src" href="https://github.com/millfolio">github.com/millfolio ↗</a>
       </header>
 
       <section class="intro">
@@ -34,7 +34,7 @@ const gh = "https://github.com/millrace";
         <p class="lede">
           Speed is easy to measure. <strong>Quality</strong> — how much you give up
           when you run a model at <code>int4</code> instead of <code>bf16</code> —
-          is not. millrace measures it with <strong>perplexity</strong>, end to end,
+          is not. millfolio measures it with <strong>perplexity</strong>, end to end,
           through the same serving path a request takes.
         </p>
       </section>
@@ -118,7 +118,7 @@ pixi run -- ./build/assay --only Qwen3-8B</code></pre>
       <section class="prose" id="results">
         <h2>What int4 costs</h2>
         <p>
-          Perplexity on the held-out corpus, measured through the millrace serving
+          Perplexity on the held-out corpus, measured through the millfolio serving
           path. The <code>bf16</code> reference exists where the unquantized model
           fits the GPU; the gap to it is the price of <code>int4</code>.
         </p>
@@ -129,9 +129,9 @@ pixi run -- ./build/assay --only Qwen3-8B</code></pre>
           </thead>
           <tbody>
             <tr><td>Qwen2.5-3B</td><td>bf16 (reference)</td><td>9.3</td></tr>
-            <tr><td>Qwen2.5-3B</td><td>millrace int4</td><td>13.6</td></tr>
-            <tr><td>Qwen3-8B</td><td>millrace int4</td><td>11.6</td></tr>
-            <tr><td>Qwen3-14B</td><td>millrace int4</td><td>8.9</td></tr>
+            <tr><td>Qwen2.5-3B</td><td>millfolio int4</td><td>13.6</td></tr>
+            <tr><td>Qwen3-8B</td><td>millfolio int4</td><td>11.6</td></tr>
+            <tr><td>Qwen3-14B</td><td>millfolio int4</td><td>8.9</td></tr>
           </tbody>
         </table>
 
@@ -153,11 +153,11 @@ pixi run -- ./build/assay --only Qwen3-8B</code></pre>
       </section>
 
       <footer>
-        <span>© millrace</span>
+        <span>© millfolio</span>
         <span class="dot">·</span>
         <a href="/how-it-works">how it works →</a>
         <span class="dot">·</span>
-        <a href="https://github.com/millrace">github.com/millrace ↗</a>
+        <a href="https://github.com/millfolio">github.com/millfolio ↗</a>
       </footer>
     </main>
   </body>

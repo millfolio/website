@@ -1,5 +1,5 @@
 ---
-const repo = "https://github.com/millrace/millrace";
+const repo = "https://github.com/millfolio/millfolio";
 ---
 
 <html lang="en">
@@ -8,31 +8,31 @@ const repo = "https://github.com/millrace/millrace";
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
-    <title>The server — millrace</title>
+    <title>The server — millfolio</title>
     <meta
       name="description"
-      content="millrace's inference server: a from-scratch, pure-Mojo GPU engine for Qwen2.5 on Apple Silicon — every kernel hand-written, no C++/CUDA/Metal deps, served over an OpenAI-compatible API."
+      content="millfolio's inference server: a from-scratch, pure-Mojo GPU engine for Qwen2.5 on Apple Silicon — every kernel hand-written, no C++/CUDA/Metal deps, served over an OpenAI-compatible API."
     />
-    <meta property="og:title" content="The millrace server" />
+    <meta property="og:title" content="The millfolio server" />
     <meta
       property="og:description"
       content="A from-scratch, pure-Mojo GPU inference engine for Qwen2.5 on Apple Silicon."
     />
     <meta property="og:type" content="article" />
-    <meta property="og:url" content="https://millrace.app/server" />
+    <meta property="og:url" content="https://millfolio.com/server" />
   </head>
   <body>
     <main>
       <header class="top">
-        <a class="back" href="/">← millrace</a>
-        <a class="src" href={repo}>millrace ↗</a>
+        <a class="back" href="/">← millfolio</a>
+        <a class="src" href={repo}>millfolio ↗</a>
       </header>
 
       <section class="intro">
         <span class="kicker">the inference server</span>
         <h1>One language, socket to logits</h1>
         <p class="lede">
-          The millrace server is a from-scratch, <strong>pure-Mojo GPU
+          The millfolio server is a from-scratch, <strong>pure-Mojo GPU
           inference engine</strong> for <strong>Qwen2.5</strong> (0.5B and 3B) on
           Apple Silicon, served over an OpenAI-compatible HTTP API. Every GPU
           kernel — matmul, attention, RMSNorm, RoPE, SwiGLU, the int4 dequant path
@@ -49,7 +49,7 @@ const repo = "https://github.com/millrace/millrace";
         <p>
           Own the whole inference path in <em>one</em> language. Most local-LLM
           stacks are a thin scripting layer over a C++/Metal core (MLX) or a
-          C/C++ engine (llama.cpp via Ollama). millrace instead writes the
+          C/C++ engine (llama.cpp via Ollama). millfolio instead writes the
           transformer forward pass — and every kernel it runs on — by hand in
           Mojo, on Apple's Metal GPU, with a small, readable codebase.
         </p>
@@ -150,7 +150,7 @@ const repo = "https://github.com/millrace/millrace";
           </li>
           <li>
             <strong>Chat templating:</strong> the real Qwen2.5 chat template is
-            rendered by <a href="https://github.com/millrace/jinja2.mojo">jinja2.mojo</a>,
+            rendered by <a href="https://github.com/millfolio/jinja2.mojo">jinja2.mojo</a>,
             a Jinja2-subset engine — verified <em>byte-identical</em> to
             <code>transformers.apply_chat_template</code>, including a tools
             request.
@@ -173,7 +173,7 @@ const repo = "https://github.com/millrace/millrace";
           <strong>group-128 int4</strong> (embedding/LM head stay bf16): on the 3B,
           ~2× faster decode GEMVs and ~4× smaller projection weights at ~84% top-1
           agreement with bf16. The OpenAI-compatible server runs on
-          <a href="https://github.com/millrace/flare">flare</a>'s kqueue reactor —
+          <a href="https://github.com/millfolio/flare">flare</a>'s kqueue reactor —
           <code>GET /v1/models</code>, <code>POST /v1/chat/completions</code>, and
           <code>POST /v1/responses</code>, with request params, a <code>usage</code>
           block, and SSE streaming. <code>opencode</code> drives it directly.
@@ -194,9 +194,9 @@ const repo = "https://github.com/millrace/millrace";
       </section>
 
       <footer>
-        <span>© millrace</span>
+        <span>© millfolio</span>
         <span class="dot">·</span>
-        <a href={repo}>millrace</a>
+        <a href={repo}>millfolio</a>
         <span class="dot">·</span>
         <a href="/get-started">get started →</a>
       </footer>
