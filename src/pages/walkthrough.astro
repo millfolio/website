@@ -1,6 +1,6 @@
 ---
 const samples = "https://github.com/millfolio/vault/tree/main/examples/vault";
-const tap = "brew install millfolioapp/tap/millfolio";
+const tap = "brew install millfolio/tap/mill";
 ---
 
 <html lang="en">
@@ -66,7 +66,7 @@ const tap = "brew install millfolioapp/tap/millfolio";
             insurance policy, and a vehicle registration:
           </p>
           <pre><code>git clone https://github.com/millfolio/vault
-cp millfolio/examples/vault/*.pdf ~/vault</code></pre>
+cp vault/examples/vault/*.pdf ~/vault</code></pre>
         </div>
       </section>
 
@@ -76,7 +76,7 @@ cp millfolio/examples/vault/*.pdf ~/vault</code></pre>
         <div class="body">
           <h2>Install millfolio</h2>
           <p>
-            Install the <strong><code>millfolio</code> CLI</strong> via Homebrew:
+            Install the <strong><code>mill</code> CLI</strong> via Homebrew:
           </p>
           <pre><code>{tap}</code></pre>
         </div>
@@ -91,14 +91,14 @@ cp millfolio/examples/vault/*.pdf ~/vault</code></pre>
             One command installs the whole stack — the inference server (a
             <strong>chat model</strong> that reads your documents and an
             <strong>embedding model</strong> for search, both served from one
-            port), the <a href="/headgate">headgate</a> harness, and the millfolio vault —
+            port), the <a href="/privacy-box">privacy box</a> harness, and the millfolio vault —
             reusing anything already installed:
           </p>
           <pre><code>mill install</code></pre>
           <p class="note">
             millfolio bundles everything it needs — the
             <a href="https://millfolio.com/server">millfolio inference server</a>,
-            the headgate harness, and the local vault site — installing each only
+            the privacy box harness, and the local vault site — installing each only
             if it isn't already there.
           </p>
         </div>
@@ -163,7 +163,7 @@ cp millfolio/examples/vault/*.pdf ~/vault</code></pre>
         <span class="dot">·</span>
         <a href="https://github.com/millfolio/vault">millfolio</a>
         <span class="dot">·</span>
-        <a href="/headgate">how the harness works →</a>
+        <a href="/privacy-box">how the harness works →</a>
       </footer>
     </main>
   </body>

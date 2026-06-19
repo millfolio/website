@@ -1,5 +1,5 @@
 ---
-const cliRepo = "https://github.com/millfolio/cli";
+const cliRepo = "https://github.com/millfolio/vault";
 const repo = "https://github.com/millfolio/vault";
 ---
 
@@ -33,7 +33,7 @@ const repo = "https://github.com/millfolio/vault";
         <h1>Get started</h1>
         <p class="lede">
           millfolio runs entirely on your Mac (Apple Silicon). Install it with the
-          <strong><code>millfolio</code> CLI</strong> via Homebrew, then point it at
+          <strong><code>mill</code> CLI</strong> via Homebrew, then point it at
           a folder of documents. Your data never leaves the machine.
         </p>
         <p class="experimental">
@@ -50,10 +50,10 @@ const repo = "https://github.com/millfolio/vault";
             <h2>CLI (Homebrew)</h2>
           </div>
           <p>Note: XCode is required, including Metal extensions `xcodebuild -downloadComponent MetalToolchain`</p>
-          <p>Install the <code>millfolio</code> CLI from the tap:</p>
-          <pre><code>brew install millfolioapp/tap/millfolio</code></pre>
+          <p>Install the <code>mill</code> CLI from the tap:</p>
+          <pre><code>brew install millfolio/tap/mill</code></pre>
           <p>Then set up the vault and ask:</p>
-          <pre><code><span class="c"># engine + weights + headgate + the local site (one time)</span>
+          <pre><code><span class="c"># engine + weights + privacy-box + the local site (one time)</span>
 mill install
 mill index ~/vault   <span class="c"># embed your documents on-device</span>
 mill start           <span class="c"># http://localhost:10000</span>
@@ -79,7 +79,7 @@ mill ask "When does my car insurance renew?"</code></pre>
         </ul>
         <p class="note">
           New to it? The <a href="/walkthrough">walkthrough</a> runs the whole
-          flow end to end on a sample vault, and <a href="/headgate">headgate</a>
+          flow end to end on a sample vault, and the <a href="/privacy-box">privacy box</a>
           explains why your data stays private.
         </p>
         <div class="cta">

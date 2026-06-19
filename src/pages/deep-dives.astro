@@ -1,6 +1,6 @@
 ---
-const sysPrompt = "https://github.com/millfolio/headgate/blob/main/resources/headgate-system.md";
-const repo = "https://github.com/millfolio/headgate";
+const sysPrompt = "https://github.com/millfolio/vault/blob/main/privacy-box/resources/privacy_box-system.md";
+const repo = "https://github.com/millfolio/vault";
 ---
 
 <html lang="en">
@@ -26,7 +26,7 @@ const repo = "https://github.com/millfolio/headgate";
     <main>
       <header class="top">
         <a class="back" href="/">← millfolio</a>
-        <a class="src" href={repo}>headgate ↗</a>
+        <a class="src" href={repo}>privacy box ↗</a>
       </header>
 
       <section class="intro">
@@ -35,15 +35,15 @@ const repo = "https://github.com/millfolio/headgate";
         <p class="lede">
           millfolio lets a powerful <strong>remote</strong> model help with your
           private data without ever seeing it. The trick — the
-          <a href="/headgate">headgate</a> harness — is to treat the frontier
+          <a href="/privacy-box">privacy box</a> harness — is to treat the frontier
           model as an <strong>untrusted code generator, not a data
           processor</strong>. Here's how one question turns into code that runs on
           your Mac.
         </p>
       </section>
 
-      <!-- ════════════════ headgate ════════════════ -->
-      <section class="prose" id="headgate">
+      <!-- ════════════════ privacy box ════════════════ -->
+      <section class="prose" id="privacy-box">
         <h2>Two asymmetric models</h2>
         <p>
           There are two models, deliberately asymmetric:
@@ -68,7 +68,7 @@ const repo = "https://github.com/millfolio/headgate";
         </ul>
         <p>
           The contract the frontier model is given is a single document — the
-          <a href={sysPrompt}>headgate system prompt</a> — loaded at runtime. It
+          <a href={sysPrompt}>privacy-box system prompt</a> — loaded at runtime. It
           spells out the confidentiality rules, the current Mojo dialect, and the
           tool surface (<code>search</code>, <code>csv_rows</code>,
           <code>pdf_text</code>, <code>ask_local</code>, <code>print_answer</code>, …).
@@ -77,7 +77,7 @@ const repo = "https://github.com/millfolio/headgate";
         <h3>Example: a question becomes a program</h3>
         <p>
           You ask <em>"How much did I spend on travel last year?"</em>. The frontier
-          model — seeing only aliases — writes this, and headgate compiles it and
+          model — seeing only aliases — writes this, and the privacy box compiles it and
           runs it in a sandbox that can reach only your local model:
         </p>
         <pre><code><span class="c"># written by the frontier model — it never sees a single real value</span>
@@ -112,14 +112,14 @@ def main() raises:
           source, never runtime output that might contain real content. Your
           documents never leave the Mac, and never reach the frontier model.
           See the <a href="/walkthrough">walkthrough</a> to try it, or
-          <a href="/headgate">headgate</a> for the full design.
+          <a href="/privacy-box">privacy box</a> for the full design.
         </p>
       </section>
 
       <footer>
         <span>© millfolio</span>
         <span class="dot">·</span>
-        <a href="/headgate">headgate →</a>
+        <a href="/privacy-box">privacy box →</a>
         <span class="dot">·</span>
         <a href="https://millfolio.com">runs on millfolio ↗</a>
       </footer>
