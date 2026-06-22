@@ -66,6 +66,82 @@ const repo = "https://github.com/millfolio/vault";
             is the only thing that ever sees real text.
           </li>
         </ul>
+        <figure class="arch">
+          <svg viewBox="0 0 760 470" role="img"
+               aria-label="millfolio architecture: the frontier model writes a program that runs in an on-device sandbox and reaches only the local inference server and your vault.">
+            <defs>
+              <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L7,3 L0,6 Z" fill="#9fb4c2" />
+              </marker>
+              <marker id="aro" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+                <path d="M0,0 L7,3 L0,6 Z" fill="#ff7a1c" />
+              </marker>
+            </defs>
+            <!-- frontier model — OUTSIDE the device boundary -->
+            <rect class="cloud" x="470" y="8" width="278" height="50" rx="10" />
+            <text class="t" x="609" y="29">Frontier model — cloud</text>
+            <text class="s" x="609" y="46">untrusted · sees only aliases (file_0, col_2)</text>
+
+            <!-- the on-device boundary: nothing real leaves the Mac -->
+            <rect class="mac" x="8" y="74" width="744" height="388" rx="14" />
+            <text class="badge" x="24" y="98">Your Mac — your data never leaves it</text>
+
+            <!-- client -->
+            <rect class="box" x="34" y="120" width="150" height="58" rx="10" />
+            <text class="t" x="109" y="145">browser / iOS</text>
+            <text class="s" x="109" y="163">the millfolio app</text>
+
+            <!-- app server :10000 (launchd) -->
+            <rect class="box srv" x="270" y="116" width="262" height="66" rx="10" />
+            <text class="t" x="401" y="141">App server · :10000</text>
+            <text class="s" x="401" y="159">UI · REST · chat WS</text>
+            <text class="tag" x="401" y="175">launchd</text>
+
+            <!-- generated program in the sandbox -->
+            <rect class="box sand" x="270" y="246" width="262" height="74" rx="10" />
+            <text class="t" x="401" y="271">Generated Mojo program</text>
+            <text class="s" x="401" y="289">runs in a sandbox —</text>
+            <text class="s" x="401" y="305">loopback network only</text>
+
+            <!-- inference server :8000 (launchd) -->
+            <rect class="box srv" x="34" y="372" width="258" height="74" rx="10" />
+            <text class="t" x="163" y="397">Inference server · :8000</text>
+            <text class="s" x="163" y="415">chat + embeddings · on-device GPU</text>
+            <text class="tag" x="163" y="431">launchd</text>
+
+            <!-- vault -->
+            <rect class="box" x="470" y="372" width="248" height="74" rx="10" />
+            <text class="t" x="594" y="397">Your vault</text>
+            <text class="s" x="594" y="415">PDF · Word · CSV · notes</text>
+            <text class="s" x="594" y="431">+ on-device LanceDB index</text>
+
+            <!-- edges -->
+            <line class="e" x1="184" y1="149" x2="266" y2="149" marker-end="url(#ar)" />
+            <text class="el" x="225" y="141">HTTPS/WS</text>
+
+            <line class="eo" x1="609" y1="58" x2="430" y2="242" marker-end="url(#aro)" stroke-dasharray="5 4" />
+            <text class="elo" x="556" y="150">writes the program</text>
+            <text class="elo" x="556" y="166">(aliases only)</text>
+
+            <line class="e" x1="401" y1="182" x2="401" y2="242" marker-end="url(#ar)" />
+            <text class="el" x="401" y="218">orchestrate · approval gate</text>
+
+            <line class="eo" x1="330" y1="320" x2="200" y2="368" marker-end="url(#aro)" />
+            <text class="elo" x="225" y="345">loopback HTTP</text>
+            <text class="elo" x="225" y="360">ask_local · search</text>
+
+            <line class="e" x1="470" y1="320" x2="560" y2="368" marker-end="url(#ar)" />
+            <text class="el" x="556" y="346">reads files</text>
+          </svg>
+          <figcaption>
+            One constraint shapes everything: the frontier-written program runs as a
+            <strong>separate, sandboxed process</strong> that can reach the network only over
+            loopback — so inference is a <strong>local service</strong> it talks to over HTTP, not
+            an in-process call. That's why there are two servers (and why they stay two: the app
+            restarts without reloading the ~7&nbsp;GB model). Both run under <strong>launchd</strong>.
+          </figcaption>
+        </figure>
+
         <p>
           The contract the frontier model is given is a single document — the
           <a href={sysPrompt}>privacy-box system prompt</a> — loaded at runtime. It
@@ -210,4 +286,31 @@ def main() raises:
   footer a { color: var(--muted); }
   footer a:hover { color: var(--accent-lite); }
   .dot { margin: 0 0.5rem; opacity: 0.5; }
+
+  /* ── architecture diagram ── */
+  .arch { margin: 1.8rem 0 0.4rem; }
+  .arch svg { width: 100%; height: auto; display: block; }
+  .arch figcaption {
+    margin: 0.7rem 0 0; color: var(--muted); font-size: 0.92rem; line-height: 1.55;
+  }
+  .arch figcaption strong { color: var(--ink); }
+  /* boxes */
+  .arch .box { fill: var(--card); stroke: var(--line); stroke-width: 1; }
+  .arch .srv { stroke: rgba(255, 122, 28, 0.5); }
+  .arch .sand { stroke: rgba(255, 122, 28, 0.5); stroke-dasharray: 5 4; }
+  .arch .mac { fill: rgba(255, 255, 255, 0.015); stroke: var(--line); stroke-width: 1.5; }
+  .arch .cloud { fill: rgba(255, 255, 255, 0.02); stroke: var(--line); stroke-width: 1; stroke-dasharray: 4 4; }
+  /* text */
+  .arch .t { fill: var(--ink); font-size: 14px; font-weight: 600; text-anchor: middle; }
+  .arch .s { fill: var(--muted); font-size: 11.5px; text-anchor: middle; }
+  .arch .badge { fill: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+  .arch .tag {
+    fill: var(--accent-lite); font-size: 10px; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase; text-anchor: middle;
+  }
+  /* edges */
+  .arch .e { stroke: var(--muted); stroke-width: 1.4; opacity: 0.7; }
+  .arch .eo { stroke: var(--accent); stroke-width: 1.6; }
+  .arch .el { fill: var(--muted); font-size: 10.5px; text-anchor: middle; }
+  .arch .elo { fill: var(--accent-lite); font-size: 10.5px; text-anchor: middle; }
 </style>
