@@ -27,8 +27,9 @@ import ArchDiagram from "../components/ArchDiagram.astro";
   <body>
     <main>
       <section class="hero">
+        <img class="hero-logo" src="/favicon.svg" alt="" width="56" height="56" />
         <span class="kicker">private · on-device · yours</span>
-        <h1>millfolio</h1>
+        <h1><span class="brand-name">millfolio</span></h1>
         <p class="lede">
           A private vault for the documents that are yours. Index your
           <strong>PDFs, Word docs, CSVs, and notes</strong> and ask open-ended questions —
@@ -71,11 +72,31 @@ import ArchDiagram from "../components/ArchDiagram.astro";
       </section>
 
       <footer>
-        <span>© millfolio</span>
+        <span>© <span class="brand-name">millfolio</span></span>
         <span class="dot">·</span>
         <a href="https://github.com/millfolio">github.com/millfolio ↗</a>
       </footer>
     </main>
+    <script is:inline>
+      // Brand follows the domain: millfolio.* → millfolio, millfoil.* → millfoil
+      // (registrable name = second-to-last DNS label; fallback millfolio). Rewrites
+      // .brand-name elements + the title at load. Guarded so the default millfolio
+      // domain renders statically with no flash.
+      (function () {
+        var labels = location.hostname.split(".").filter(Boolean);
+        var sld = labels.length >= 2 ? labels[labels.length - 2] : "";
+        var brand = /^[a-z]/i.test(sld) ? sld : "millfolio";
+        if (brand === "millfolio") return;
+        var cap = brand.charAt(0).toUpperCase() + brand.slice(1);
+        var sub = function (s) {
+          return s.replace(/Millfolio/g, cap).replace(/millfolio/g, brand);
+        };
+        document.title = sub(document.title);
+        document.querySelectorAll(".brand-name").forEach(function (el) {
+          el.textContent = sub(el.textContent);
+        });
+      })();
+    </script>
   </body>
 </html>
 
@@ -113,6 +134,10 @@ import ArchDiagram from "../components/ArchDiagram.astro";
 
   main { max-width: 760px; margin: 0 auto; padding: clamp(2.5rem, 8vw, 5rem) 1.5rem 3rem; }
 
+  .hero-logo {
+    display: block; border-radius: 13px; margin: 0 0 0.9rem;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  }
   .kicker {
     text-transform: uppercase; letter-spacing: 0.1em;
     font-size: 0.78rem; font-weight: 700; color: var(--accent-lite);

@@ -13,5 +13,25 @@
   </head>
   <body>
     <p>This page moved to <a href="/server">the inference server</a>.</p>
+    <script is:inline>
+      // Brand follows the domain: millfolio.* → millfolio, millfoil.* → millfoil
+      // (registrable name = second-to-last DNS label; fallback millfolio). Rewrites
+      // .brand-name elements + the title at load. Guarded so the default millfolio
+      // domain renders statically with no flash.
+      (function () {
+        var labels = location.hostname.split(".").filter(Boolean);
+        var sld = labels.length >= 2 ? labels[labels.length - 2] : "";
+        var brand = /^[a-z]/i.test(sld) ? sld : "millfolio";
+        if (brand === "millfolio") return;
+        var cap = brand.charAt(0).toUpperCase() + brand.slice(1);
+        var sub = function (s) {
+          return s.replace(/Millfolio/g, cap).replace(/millfolio/g, brand);
+        };
+        document.title = sub(document.title);
+        document.querySelectorAll(".brand-name").forEach(function (el) {
+          el.textContent = sub(el.textContent);
+        });
+      })();
+    </script>
   </body>
 </html>
