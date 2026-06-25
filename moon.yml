@@ -6,5 +6,5 @@ tasks:
   build:
     command: 'npm run build'
     toolchain: 'system'
-    inputs: ['src/**/*', 'package.json', 'astro.config.mjs']
+    inputs: ['src/**/*', 'public/**/*', 'package.json', 'astro.config.mjs']
     outputs: ['dist/**/*']
