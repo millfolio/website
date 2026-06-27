@@ -89,6 +89,29 @@ mill ask "When does my car insurance renew?"</code></pre>
         </div>
       </section>
 
+      <section class="reqs">
+        <h2>Uninstall</h2>
+        <p class="note">
+          millfolio is self-contained: the engine, the toolchain, <strong>and the
+          model weights</strong> all live under a single folder — so removing it is
+          clean, with nothing scattered across your system.
+        </p>
+        <pre><code><span class="c"># stop everything, then remove the CLI + tap</span>
+mill stop
+brew uninstall millfolio/tap/mill
+brew untap millfolio/tap
+
+<span class="c"># unload + remove the launch agents (inference server + app server)</span>
+launchctl bootout gui/$(id -u)/me.millfolio.server    2&gt;/dev/null
+launchctl bootout gui/$(id -u)/me.millfolio.appserver 2&gt;/dev/null
+rm -f ~/Library/LaunchAgents/me.millfolio.server.plist \
+      ~/Library/LaunchAgents/me.millfolio.appserver.plist
+
+<span class="c"># everything else — bundle, toolchain, AND the model weights — is one folder:</span>
+rm -rf ~/Library/Application\ Support/Millfolio
+rm -rf ~/.config/millfolio   <span class="c"># your on-device index (built by `mill index`)</span></code></pre>
+      </section>
+
       <footer>
         <span>© <span class="brand-name">millfolio</span></span>
         <span class="dot">·</span>
