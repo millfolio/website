@@ -45,7 +45,7 @@ const repo = "https://github.com/millfolio/vault";
 
       <section class="ways">
         <!-- ── Homebrew CLI ─────────────────────────────────────── -->
-        <article class="way">
+        <article class="way" id="index">
           <div class="way-head">
             <span class="badge">command line</span>
             <h2>CLI (Homebrew)</h2>
@@ -231,6 +231,7 @@ rm -rf ~/.config/millfolio   <span class="c"># your on-device index (built by `m
     border: 1px solid var(--line);
     border-radius: 14px;
     background: var(--card);
+    scroll-margin-top: 1.5rem; /* deep-link (#index) lands below the viewport edge */
   }
   .way-head {
     display: flex;
