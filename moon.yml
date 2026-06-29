@@ -8,3 +8,10 @@ tasks:
     toolchain: 'system'
     inputs: ['src/**/*', 'public/**/*', 'package.json', 'astro.config.mjs']
     outputs: ['dist/**/*']
+
+  # `check` = build the static site. It's the site's only meaningful gate (astro
+  # build fails on broken pages/imports/config) and the LAST one before Cloudflare
+  # auto-deploys on push — so `moon run :check` (and the pre-push hook) now actually
+  # validates a website change instead of silently letting a broken build deploy.
+  check:
+    deps: ['~:build']
