@@ -1,139 +1,58 @@
 ---
-// Category-registry flow diagram — used on /deep-dives. Self-contained teal
-// palette (mirrors ArchDiagram) so it renders identically wherever it's dropped.
+// Category-registry flow diagram — used on /deep-dives. Now a Mermaid flowchart
+// (plain-text, editable) instead of hand-placed SVG, mirroring ArchDiagram.
 // Story: tags are matched ONCE at index time by a deterministic, user-editable
-// rule registry; at query time the frontier model is told only the tag NAMES and
-// writes a program that filters transactions() on `.tags`. Keyword rules + your
-// data never leave the Mac.
+// rule registry (built-in rules + your categories.txt); at query time the frontier
+// model is told only the tag NAMES and writes a program that filters transactions()
+// on `.tags`. The keyword rules + your data never leave the Mac, so the frontier
+// model sits OUTSIDE the device boundary and the only cross-boundary edges carry
+// tag NAMES (never your rules or data).
+import Mermaid from "./Mermaid.astro";
+
+const chart = `flowchart TB
+  FM["<b>Frontier model — cloud</b><br/>untrusted · sees only<br/>the tag NAMES (phone, travel, pets…)"]
+  subgraph mac["Your Mac — the rules and your data stay here"]
+    direction TB
+    Q["Your question<br/>“how much on phone?”"]
+    PROG["Generated program<br/>sum(.amount) where<br/>“phone” in t.tags"]
+    ANS["Your answer<br/>computed on-device"]
+    subgraph idx["At index time — once, on-device, no model call"]
+      direction LR
+      STMT["Your statements<br/>PDF · CSV · OFX"]
+      EXT["Extract<br/>reconciled txns"]
+      REG["Category registry<br/>built-in rules<br/>+ your categories.txt"]
+      TIDX["Tagged index<br/>.tags on each txn"]
+    end
+  end
+  Q -->|"sends the tag NAMES + aliased manifest"| FM
+  FM -.->|"writes the .tags filter"| PROG
+  PROG -->|"exact filter over stored tags"| ANS
+  STMT --> EXT
+  EXT --> REG
+  REG --> TIDX
+  TIDX -->|"reads tagged txns"| PROG
+
+  classDef box fill:rgba(255,255,255,0.04),stroke:rgba(159,180,194,0.30),color:#eaf1f6;
+  classDef srv fill:rgba(255,255,255,0.04),stroke:rgba(255,122,28,0.55),color:#eaf1f6;
+  classDef cloud fill:rgba(255,122,28,0.07),stroke:#ff7a1c,stroke-dasharray:4 4,color:#eaf1f6;
+  classDef sand fill:rgba(255,255,255,0.03),stroke:#ff7a1c,stroke-dasharray:5 4,color:#eaf1f6;
+  class Q,ANS,STMT,EXT,TIDX box;
+  class REG srv;
+  class FM cloud;
+  class PROG sand;
+  linkStyle 0,1 stroke:#ff7a1c,color:#ffb05c;`;
 ---
 
-<figure class="catflow">
-  <svg viewBox="0 0 760 450" role="img"
-       aria-label="How categories work: at index time a deterministic rule registry (built-in rules plus your categories.txt) tags every transaction in the on-device index; at query time the frontier model is told only the tag names and writes a program that filters transactions by tag. Keyword rules and your data never leave the Mac.">
-    <defs>
-      <marker id="car" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
-        <path d="M0,0 L7,3 L0,6 Z" fill="#9fb4c2" />
-      </marker>
-      <marker id="caro" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
-        <path d="M0,0 L7,3 L0,6 Z" fill="#ff7a1c" />
-      </marker>
-    </defs>
-
-    <!-- frontier model — OUTSIDE the device boundary -->
-    <rect class="cloud" x="430" y="8" width="318" height="50" rx="10" />
-    <text class="t" x="589" y="29">Frontier model — cloud</text>
-    <text class="s" x="589" y="46">sees only the tag NAMES (phone, travel, pets…)</text>
-
-    <!-- the on-device boundary -->
-    <rect class="mac" x="8" y="74" width="744" height="368" rx="14" />
-    <text class="badge" x="24" y="98">Your Mac — the rules and your data stay here</text>
-
-    <!-- ── query-time band (top, right under the cloud) ── -->
-    <text class="band" x="24" y="120">At query time — the model filters the stored tags</text>
-
-    <rect class="box" x="24" y="130" width="158" height="60" rx="10" />
-    <text class="t" x="103" y="155">Your question</text>
-    <text class="s" x="103" y="173">“how much on phone?”</text>
-
-    <rect class="box sand" x="300" y="126" width="216" height="68" rx="10" />
-    <text class="t" x="408" y="151">Generated program</text>
-    <text class="s" x="408" y="169">sum(.amount) where</text>
-    <text class="s" x="408" y="185">“phone” in t.tags</text>
-
-    <rect class="box" x="566" y="130" width="178" height="60" rx="10" />
-    <text class="t" x="655" y="155">Your answer</text>
-    <text class="s" x="655" y="173">computed on-device</text>
-
-    <!-- question → cloud, and cloud → program: the ONLY edges crossing the
-         boundary — and they carry tag NAMES, never rules or data -->
-    <line class="eo" x1="120" y1="130" x2="498" y2="60" marker-end="url(#caro)" stroke-dasharray="5 4" />
-    <text class="elo" x="300" y="92">sends the tag NAMES</text>
-    <text class="elo" x="300" y="108">+ aliased manifest</text>
-
-    <line class="eo" x1="618" y1="60" x2="470" y2="122" marker-end="url(#caro)" stroke-dasharray="5 4" />
-    <text class="elo" x="600" y="92">writes the</text>
-    <text class="elo" x="600" y="108">.tags filter</text>
-
-    <line class="e" x1="516" y1="160" x2="562" y2="160" marker-end="url(#car)" />
-
-    <!-- ── index-time band (bottom) ── -->
-    <text class="band" x="24" y="288">At index time — once, on-device, no model call</text>
-
-    <rect class="box" x="24" y="300" width="150" height="58" rx="10" />
-    <text class="t" x="99" y="325">Your statements</text>
-    <text class="s" x="99" y="343">PDF · CSV · OFX</text>
-
-    <rect class="box" x="206" y="300" width="150" height="58" rx="10" />
-    <text class="t" x="281" y="325">Extract</text>
-    <text class="s" x="281" y="343">reconciled txns</text>
-
-    <rect class="box reg" x="388" y="294" width="186" height="70" rx="10" />
-    <text class="t" x="481" y="318">Category registry</text>
-    <text class="s" x="481" y="335">built-in rules</text>
-    <text class="s" x="481" y="351">+ your categories.txt</text>
-
-    <rect class="box" x="606" y="300" width="138" height="58" rx="10" />
-    <text class="t" x="675" y="325">Tagged index</text>
-    <text class="s" x="675" y="343">.tags on each txn</text>
-
-    <line class="e" x1="174" y1="329" x2="204" y2="329" marker-end="url(#car)" />
-    <line class="e" x1="356" y1="329" x2="386" y2="329" marker-end="url(#car)" />
-    <line class="e" x1="574" y1="329" x2="604" y2="329" marker-end="url(#car)" />
-
-    <!-- tagged index → program (the program reads the stored tags) -->
-    <line class="e" x1="660" y1="300" x2="478" y2="196" marker-end="url(#car)" />
-    <text class="el" x="610" y="243">reads tagged txns</text>
-  </svg>
-  <figcaption>
-    Categories are <strong>rules, not guesses</strong>. A deterministic registry —
-    the built-ins (<code>phone</code>, <code>travel</code>, <code>restaurant</code>,
-    <code>groceries</code>, <code>health</code>) plus anything you add to
-    <code>categories.txt</code> — tags every transaction <strong>once at index
-    time</strong>, with no model call. So a category answer is a fast, exact filter
-    over stored tags. The frontier model is told only the tag <strong>names</strong>
-    (the vocabulary it can filter on) — never your keyword rules, which hold the
-    merchant strings you typed and <strong>never leave the Mac</strong>.
-  </figcaption>
-</figure>
-
-<style>
-  /* self-contained palette so the diagram is portable across pages */
-  .catflow {
-    --d-card: rgba(255, 255, 255, 0.035);
-    --d-line: rgba(159, 180, 194, 0.18);
-    --d-ink: #eaf1f6;
-    --d-muted: #9fb4c2;
-    --d-accent: #ff7a1c;
-    --d-accent-lite: #ffb05c;
-    margin: 1.8rem 0 0.4rem;
-  }
-  .catflow svg { width: 100%; height: auto; display: block; }
-  .catflow figcaption {
-    margin: 0.7rem 0 0; color: var(--d-muted); font-size: 0.92rem; line-height: 1.55;
-  }
-  .catflow figcaption strong { color: var(--d-ink); }
-  .catflow figcaption code {
-    background: rgba(255, 255, 255, 0.06); border: 1px solid var(--d-line);
-    border-radius: 5px; padding: 0.02rem 0.3rem; color: var(--d-ink);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85em;
-  }
-  /* boxes */
-  .catflow .box { fill: var(--d-card); stroke: var(--d-line); stroke-width: 1; }
-  .catflow .reg { stroke: rgba(255, 122, 28, 0.55); stroke-width: 1.4; }
-  .catflow .sand { stroke: rgba(255, 122, 28, 0.5); stroke-dasharray: 5 4; }
-  .catflow .mac { fill: rgba(255, 255, 255, 0.015); stroke: var(--d-line); stroke-width: 1.5; }
-  .catflow .cloud { fill: rgba(255, 255, 255, 0.02); stroke: var(--d-line); stroke-width: 1; stroke-dasharray: 4 4; }
-  /* text */
-  .catflow .t { fill: var(--d-ink); font-size: 14px; font-weight: 600; text-anchor: middle; }
-  .catflow .s { fill: var(--d-muted); font-size: 11.5px; text-anchor: middle; }
-  .catflow .badge { fill: var(--d-muted); font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
-  .catflow .band {
-    fill: var(--d-accent-lite); font-size: 10.5px; font-weight: 700;
-    letter-spacing: 0.05em; text-transform: uppercase;
-  }
-  /* edges */
-  .catflow .e { stroke: var(--d-muted); stroke-width: 1.4; opacity: 0.7; }
-  .catflow .eo { stroke: var(--d-accent); stroke-width: 1.6; }
-  .catflow .el { fill: var(--d-muted); font-size: 10.5px; text-anchor: middle; }
-  .catflow .elo { fill: var(--d-accent-lite); font-size: 10.5px; text-anchor: middle; }
-</style>
+<Mermaid
+  code={chart}
+  label="How categories work: at index time a deterministic rule registry (built-in rules plus your categories.txt) tags every transaction in the on-device index; at query time the frontier model is told only the tag names and writes a program that filters transactions by tag. Keyword rules and your data never leave the Mac."
+>
+  Categories are <strong>rules, not guesses</strong>. A deterministic registry —
+  the built-ins (<code>phone</code>, <code>travel</code>, <code>restaurant</code>,
+  <code>groceries</code>, <code>health</code>) plus anything you add to
+  <code>categories.txt</code> — tags every transaction <strong>once at index
+  time</strong>, with no model call. So a category answer is a fast, exact filter
+  over stored tags. The frontier model is told only the tag <strong>names</strong>
+  (the vocabulary it can filter on) — never your keyword rules, which hold the
+  merchant strings you typed and <strong>never leave the Mac</strong>.
+</Mermaid>
