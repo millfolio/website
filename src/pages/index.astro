@@ -2,7 +2,6 @@
 // millfolio landing. Deep content was merged from the millrace (engine) and
 // veilens (vault) sites; those inner pages still carry their original branding
 // and want an editorial rebrand pass. This landing is the millfolio surface.
-import ArchDiagram from "../components/ArchDiagram.astro";
 ---
 
 <html lang="en">
@@ -52,11 +51,6 @@ import ArchDiagram from "../components/ArchDiagram.astro";
           <a class="btn" href="/get-started">Get started</a>
           <a class="btn" href="/walkthrough">Walkthrough</a>
         </div>
-      </section>
-
-      <section class="arch-section">
-        <h2>How it works</h2>
-        <ArchDiagram />
       </section>
 
       <section class="links">
@@ -190,8 +184,4 @@ import ArchDiagram from "../components/ArchDiagram.astro";
   footer a { color: var(--muted); }
   footer a:hover { color: var(--accent-lite); }
   .dot { margin: 0 0.5rem; opacity: 0.5; }
-  .arch-section { margin-top: clamp(2.5rem, 6vw, 4rem); }
-  .arch-section h2 {
-    font-size: 1.35rem; margin: 0; text-align: center; color: var(--ink);
-  }
 </style>
