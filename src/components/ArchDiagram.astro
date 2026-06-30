@@ -23,15 +23,15 @@ const chart = `flowchart TB
   SAND -->|"loopback HTTP · ask_local · search"| INF
   SAND -->|"reads files + .tags"| VAULT
 
-  classDef box fill:rgba(255,255,255,0.04),stroke:rgba(159,180,194,0.30),color:#eaf1f6;
-  classDef srv fill:rgba(255,255,255,0.04),stroke:rgba(255,122,28,0.55),color:#eaf1f6;
-  classDef cloud fill:rgba(255,122,28,0.07),stroke:#ff7a1c,stroke-dasharray:4 4,color:#eaf1f6;
-  classDef sand fill:rgba(255,255,255,0.03),stroke:#ff7a1c,stroke-dasharray:5 4,color:#eaf1f6;
+  classDef box fill:#ffffff0a,stroke:#9fb4c24d,color:#eaf1f6;
+  classDef srv fill:#ffffff0a,stroke:#ff7a1c8c,color:#eaf1f6;
+  classDef cloud fill:#ff7a1c12,stroke:#ff7a1c,stroke-dasharray:4 4,color:#eaf1f6;
+  classDef sand fill:#ffffff08,stroke:#ff7a1c,stroke-dasharray:5 4,color:#eaf1f6;
   class CLIENT,VAULT box;
   class APP,INF srv;
   class FM cloud;
   class SAND sand;
-  linkStyle 1,2 stroke:#ff7a1c,color:#ffb05c;`;
+  linkStyle 1,2 stroke:#ff7a1c`;
 ---
 
 <Mermaid

@@ -1,70 +1,90 @@
 ---
-// Reusable Mermaid diagram — renders a `code` string client-side so the diagram
-// is plain text you can edit in place (no hand-placed SVG coordinates). Themed to
-// match the site's teal/orange palette. Mermaid is loaded from a CDN as an inline
-// ES module (is:inline → Astro leaves it untouched; the browser runs it), so the
-// build stays dependency-free. Pass the diagram as `code`; put the caption in the
-// default slot.
+// Reusable Mermaid diagram — rendered to static SVG at BUILD time (server-side)
+// so the page ships plain SVG: no client JS, no CDN import, no "Unhandled Promise
+// Rejection", and it renders in restrictive contexts (side panels, no-script).
+// The diagram stays editable mermaid text in `code`; we just render it during the
+// build via kroki.io (an HTTP mermaid→SVG service — no headless browser needed,
+// works in any Node/Cloudflare build). Theme is injected as a mermaid %%init%%
+// directive so kroki produces it in our teal/orange palette.
 interface Props {
   code: string;
   label?: string;
 }
 const { code, label } = Astro.props;
+
+const init = {
+  theme: "base",
+  themeVariables: {
+    background: "transparent",
+    fontFamily: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+    fontSize: "13px",
+    primaryColor: "rgba(255,255,255,0.04)",
+    primaryTextColor: "#eaf1f6",
+    primaryBorderColor: "rgba(159,180,194,0.35)",
+    lineColor: "#9fb4c2",
+    secondaryColor: "rgba(255,122,28,0.10)",
+    tertiaryColor: "rgba(255,255,255,0.02)",
+    clusterBkg: "rgba(255,255,255,0.015)",
+    clusterBorder: "rgba(159,180,194,0.25)",
+    titleColor: "#9fb4c2",
+    edgeLabelBackground: "#0b1620",
+  },
+  flowchart: { curve: "basis", htmlLabels: true, padding: 12 },
+};
+const source = `%%{init: ${JSON.stringify(init)}}%%\n${code}`;
+
+// Render at build. If kroki is unreachable the build still succeeds — we fall back
+// to the diagram source in a <pre> rather than failing the whole site build.
+let svg: string | null = null;
+let renderError = "";
+try {
+  const res = await fetch("https://kroki.io/mermaid/svg", {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: source,
+  });
+  if (!res.ok) throw new Error(`kroki HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  svg = await res.text();
+} catch (e) {
+  renderError = e instanceof Error ? e.message : String(e);
+  console.warn(`[Mermaid] build-time render failed, showing source fallback — ${renderError}`);
+}
 ---
 
 <figure class="mmd">
-  <pre class="mermaid" role="img" aria-label={label}>{code}</pre>
+  {
+    svg ? (
+      <div class="svgwrap" role="img" aria-label={label} set:html={svg} />
+    ) : (
+      <pre class="fallback" aria-label={label}>{code}</pre>
+    )
+  }
   <figcaption><slot /></figcaption>
 </figure>
-
-<script is:inline type="module">
-  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
-  mermaid.initialize({
-    startOnLoad: false,
-    securityLevel: "loose",
-    theme: "base",
-    fontFamily: "inherit",
-    flowchart: { curve: "basis", htmlLabels: true, padding: 12 },
-    themeVariables: {
-      background: "transparent",
-      fontSize: "13px",
-      primaryColor: "rgba(255,255,255,0.04)",
-      primaryTextColor: "#eaf1f6",
-      primaryBorderColor: "rgba(159,180,194,0.35)",
-      lineColor: "#9fb4c2",
-      secondaryColor: "rgba(255,122,28,0.10)",
-      tertiaryColor: "rgba(255,255,255,0.02)",
-      clusterBkg: "rgba(255,255,255,0.015)",
-      clusterBorder: "rgba(159,180,194,0.25)",
-      titleColor: "#9fb4c2",
-      edgeLabelBackground: "#0b1620",
-    },
-  });
-  // Idempotent: run() only processes diagrams not already marked data-processed,
-  // so multiple Mermaid components on one page each call this harmlessly.
-  await mermaid.run();
-</script>
 
 <style>
   .mmd {
     margin: 1.8rem 0 0.4rem;
   }
-  .mmd .mermaid {
-    margin: 0;
+  .mmd .svgwrap {
     text-align: center;
-    line-height: normal;
-    /* hide the un-rendered source text until mermaid swaps in the SVG */
-    color: transparent;
   }
-  .mmd .mermaid[data-processed] {
-    color: inherit;
-  }
-  .mmd .mermaid svg {
+  .mmd .svgwrap :global(svg) {
     width: 100%;
     max-width: 760px;
     height: auto;
     display: block;
     margin: 0 auto;
+  }
+  .mmd .fallback {
+    overflow-x: auto;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(159, 180, 194, 0.18);
+    border-radius: 8px;
+    color: #9fb4c2;
+    font-size: 0.8rem;
+    line-height: 1.5;
   }
   .mmd figcaption {
     margin: 0.7rem 0 0;
