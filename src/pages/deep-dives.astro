@@ -1,5 +1,6 @@
 ---
 import ArchDiagram from "../components/ArchDiagram.astro";
+import CategoryFlow from "../components/CategoryFlow.astro";
 const sysPrompt = "https://github.com/millfolio/vault/blob/main/privacy-box/resources/privacy_box-system.md";
 const repo = "https://github.com/millfolio/vault";
 ---
@@ -117,6 +118,65 @@ def main() raises:
           documents never leave the Mac, and never reach the frontier model.
           See the <a href="/walkthrough">walkthrough</a> to try it, or
           <a href="/privacy-box">privacy box</a> for the full design.
+        </p>
+      </section>
+
+      <!-- ════════════════ categories ════════════════ -->
+      <section class="prose" id="categories">
+        <h2>Categories, by rule — not by guesswork</h2>
+        <p>
+          "How much did I spend on my phone bill?" used to mean asking the local
+          model, transaction by transaction, "is this a phone carrier?" — slow, and
+          occasionally wrong in spectacular ways (a stray account number once read
+          as a phone number turned a phone bill into <code>$224,303</code>). Now
+          categories are <strong>deterministic rules</strong>, matched once when
+          your statements are indexed — so a category answer is a fast, exact filter
+          over stored tags, with no per-transaction model call.
+        </p>
+        <CategoryFlow />
+
+        <h3>A registry you can edit</h3>
+        <p>
+          The registry ships with sensible built-ins — <code>phone</code>,
+          <code>travel</code>, <code>restaurant</code>, <code>groceries</code>,
+          <code>health</code> — and is just a text file you own at
+          <code>~/.config/millfolio/categories.txt</code>. Add your own categories,
+          or extend a built-in, then re-index:
+        </p>
+        <pre><code><span class="c"># ~/.config/millfolio/categories.txt — &lt;tag&gt; = keyword, keyword, …</span>
+pets = chewy, petco, the vet
+subscriptions = netflix, spotify, hbo max
+phone = my local carrier        <span class="c"># extends the built-in phone tag</span></code></pre>
+        <p>
+          Matching is case-insensitive and <strong>multi-valued</strong> — an
+          airport restaurant can be both <code>travel</code> and
+          <code>restaurant</code>. And because the rules are deterministic, a
+          credit-card payment with a long account number is <em>never</em> mistaken
+          for a phone bill: it matches no carrier keyword, so it gets no tag.
+        </p>
+
+        <h3>What the model sees — names, not rules</h3>
+        <p>
+          At query time the frontier model is handed the available tag
+          <strong>names</strong> — the vocabulary it's allowed to filter on,
+          including your custom ones — and writes a program over the already-tagged
+          transactions:
+        </p>
+        <pre><code>from vault import *
+def main() raises:
+    var total = 0.0
+    for f in manifest():
+        for t in transactions(f.alias):       <span class="c"># exact, reconciled, already tagged</span>
+            if t.direction == "debit" and "phone" in t.tags:
+                total += t.amount
+    print_answer("You paid " + money(total) + " on your phone bill.")</code></pre>
+        <p>
+          The keyword <em>rules</em> — which hold the merchant strings you typed —
+          stay on your Mac; only the tag <strong>names</strong> ever cross to the
+          cloud, and the <a href="#privacy-box">egress guard</a> gates that message
+          like every other. Anything the rules don't name still falls back to the
+          on-device <code>ask_local</code> path <a href="#privacy-box">shown
+          above</a>.
         </p>
       </section>
 
