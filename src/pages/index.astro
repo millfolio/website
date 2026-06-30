@@ -30,13 +30,19 @@ import ArchDiagram from "../components/ArchDiagram.astro";
       <section class="hero">
         <span class="kicker">private · on-device</span>
         <h1><span class="brand-name">millfolio</span></h1>
-        <p class="lede">
-          A private vault for the documents that are yours. Index your
+        <div class="lede">
+          <p>A private vault for your documents. Index your
           <strong>PDFs, Word docs, CSVs, and notes</strong> and ask open-ended questions —
           answered <strong>locally</strong>, your data never leaving the machine.
-          A frontier model writes the code that runs on your data; it never sees
-          the data itself.
-        </p>
+          The system has 3 actors:</p>
+          <ul>
+            <li>The <strong>frontier model</strong> writes the code that runs on your data; it never sees
+            the data itself.</li>
+            <li>The <strong>local model</strong> accesses and processes the local data as instructed by the generated code.</li>
+            <li>A flexible system of <strong>derived tags</strong> are computed with deterministic or ML prompts. This
+            allows the vault to scale past a few hundreds of transactions.</li>
+          </ul>
+        </div>
         <p class="lede">
           This application has been tested on M2 and M4 harware with 16GB-24GB memory.
         </p>
@@ -56,7 +62,7 @@ import ArchDiagram from "../components/ArchDiagram.astro";
       <section class="links">
         <a class="card" href="/server">
           <h3>The inference server →</h3>
-          <p>The from-scratch, pure-Mojo GPU engine — socket to logits, every kernel hand-written — the models it serves, and the performance numbers.</p>
+          <p>The from-scratch, pure-Mojo GPU engine — socket to logits, every kernel custom-written — the models it serves, and the performance numbers.</p>
         </a>
         <a class="card" href="/tools">
           <h3>The tools →</h3>
@@ -74,11 +80,6 @@ import ArchDiagram from "../components/ArchDiagram.astro";
           <h3>Measuring quality →</h3>
           <p>How we quantify what int4 quantization costs, with perplexity.</p>
         </a>
-      </section>
-
-      <section class="hardware">
-        <p class="hardware">
-        </p>
       </section>
 
       <footer>
