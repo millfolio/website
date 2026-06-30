@@ -56,7 +56,9 @@ const repo = "https://github.com/millfolio/vault";
             <strong>The frontier model</strong> (untrusted) is the planner/coder.
             It sees only a <em>sanitized manifest</em> of your vault — file
             <em>aliases</em> (<code>file_0</code>), kinds, aliased column schemas
-            (<code>col_2</code>) — never contents, names, or values. From that it
+            (<code>col_2</code>) — plus the category <em>tag names</em>
+            (<code>phone</code>, <code>travel</code>…) it can filter on, and
+            never contents, names, values, or your keyword rules. From that it
             writes <strong>one Mojo program</strong> that calls a fixed set of
             vault tools.
           </li>
@@ -82,8 +84,8 @@ const repo = "https://github.com/millfolio/vault";
         <h3>Example: a question becomes a program</h3>
         <p>
           You ask <em>"How much did I spend on travel last year?"</em>. The frontier
-          model — seeing only aliases — writes this, and the privacy box compiles it and
-          runs it in a sandbox that can reach only your local model:
+          model — seeing only aliases and the tag names — writes this, and the privacy box
+          compiles it and runs it in a sandbox that can reach only your local model:
         </p>
         <pre><code><span class="c"># written by the frontier model — it never sees a single real value</span>
 from vault import *

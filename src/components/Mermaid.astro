@@ -1,0 +1,87 @@
+---
+// Reusable Mermaid diagram — renders a `code` string client-side so the diagram
+// is plain text you can edit in place (no hand-placed SVG coordinates). Themed to
+// match the site's teal/orange palette. Mermaid is loaded from a CDN as an inline
+// ES module (is:inline → Astro leaves it untouched; the browser runs it), so the
+// build stays dependency-free. Pass the diagram as `code`; put the caption in the
+// default slot.
+interface Props {
+  code: string;
+  label?: string;
+}
+const { code, label } = Astro.props;
+---
+
+<figure class="mmd">
+  <pre class="mermaid" role="img" aria-label={label}>{code}</pre>
+  <figcaption><slot /></figcaption>
+</figure>
+
+<script is:inline type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({
+    startOnLoad: false,
+    securityLevel: "loose",
+    theme: "base",
+    fontFamily: "inherit",
+    flowchart: { curve: "basis", htmlLabels: true, padding: 12 },
+    themeVariables: {
+      background: "transparent",
+      fontSize: "13px",
+      primaryColor: "rgba(255,255,255,0.04)",
+      primaryTextColor: "#eaf1f6",
+      primaryBorderColor: "rgba(159,180,194,0.35)",
+      lineColor: "#9fb4c2",
+      secondaryColor: "rgba(255,122,28,0.10)",
+      tertiaryColor: "rgba(255,255,255,0.02)",
+      clusterBkg: "rgba(255,255,255,0.015)",
+      clusterBorder: "rgba(159,180,194,0.25)",
+      titleColor: "#9fb4c2",
+      edgeLabelBackground: "#0b1620",
+    },
+  });
+  // Idempotent: run() only processes diagrams not already marked data-processed,
+  // so multiple Mermaid components on one page each call this harmlessly.
+  await mermaid.run();
+</script>
+
+<style>
+  .mmd {
+    margin: 1.8rem 0 0.4rem;
+  }
+  .mmd .mermaid {
+    margin: 0;
+    text-align: center;
+    line-height: normal;
+    /* hide the un-rendered source text until mermaid swaps in the SVG */
+    color: transparent;
+  }
+  .mmd .mermaid[data-processed] {
+    color: inherit;
+  }
+  .mmd .mermaid svg {
+    width: 100%;
+    max-width: 760px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+  .mmd figcaption {
+    margin: 0.7rem 0 0;
+    color: #9fb4c2;
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+  .mmd figcaption :global(strong) {
+    color: #eaf1f6;
+  }
+  .mmd figcaption :global(code) {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(159, 180, 194, 0.18);
+    border-radius: 5px;
+    padding: 0.02rem 0.3rem;
+    color: #eaf1f6;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.85em;
+  }
+</style>
