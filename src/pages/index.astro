@@ -1,9 +1,3 @@
----
-// millfolio landing. Deep content was merged from the millrace (engine) and
-// veilens (vault) sites; those inner pages still carry their original branding
-// and want an editorial rebrand pass. This landing is the millfolio surface.
----
-
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -22,7 +16,11 @@
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://millfolio.app" />
-      <!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "d7fd1872198b48cc97d83e09b7179cd6"}'></script><!-- End Cloudflare Web Analytics -->
+    <!-- Cloudflare Web Analytics -->
+    <script
+      defer
+      src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon='{"token": "d7fd1872198b48cc97d83e09b7179cd6"}'></script><!-- End Cloudflare Web Analytics -->
   </head>
   <body>
     <main>
@@ -30,21 +28,34 @@
         <span class="kicker">private · on-device</span>
         <h1><span class="brand-name">millfolio</span></h1>
         <div class="lede">
-          <p>A private vault for your documents. Index your
-          <strong>PDFs, Word docs, CSVs, and notes</strong> and ask open-ended questions —
-          answered <strong>locally</strong>, your data never leaving the machine.
-          The system has 3 actors:</p>
+          <p>
+            A private vault for your documents. Index your
+            <strong>PDFs, Word docs, CSVs, and notes</strong> and ask open-ended questions — answered <strong
+              >locally</strong
+            >, your data never leaving the machine.
+          </p>
+          <p>
+            Isolating your data while running on the modest compute available on most people's machines is an ongoing,
+            interesting challenge. The solution rests on three moving parts:
+          </p>
           <ul>
-            <li>The <strong>frontier model</strong> writes the code that runs on your data; it never sees
-            the data itself.</li>
-            <li>The <strong>local model</strong> accesses and processes the local data as instructed by the generated code.</li>
-            <li>A flexible system of <strong>derived tags</strong> are computed with deterministic or ML prompts. This
-            allows the vault to scale past a few hundreds of transactions.</li>
+            <li>
+              The <strong>frontier model</strong> writes the code that runs on your data; it never sees the data itself.
+            </li>
+            <li>The <strong>local model</strong> processes your data as instructed by the generated code.</li>
+            <li>
+              A flexible registry of <strong>derived tags</strong> lets the vault scale past a few hundred records — computed
+              from deterministic rules or, for fuzzier cases, ML prompts applied incrementally in the background via a <strong
+                >materialization ledger</strong
+              > (see the <a href="/deep-dives#categories">deep dive</a>).
+            </li>
           </ul>
+          <p>
+            You'll get the most out of it if you review and edit your tags occasionally — the vault ships with sane
+            defaults, but you know your data best.
+          </p>
         </div>
-        <p class="lede">
-          This application has been tested on M2 and M4 harware with 16GB-24GB memory.
-        </p>
+        <p class="lede">This application has been tested on M2 and M4 hardware with 16–24GB memory.</p>
 
         <div class="cta">
           <a class="btn primary" href="https://demo.millfolio.app">Try the live demo ↗</a>
@@ -56,7 +67,10 @@
       <section class="links">
         <a class="card" href="/server">
           <h3>The inference server →</h3>
-          <p>The from-scratch, pure-Mojo GPU engine — socket to logits, every kernel custom-written — the models it serves, and the performance numbers.</p>
+          <p>
+            The from-scratch, pure-Mojo GPU engine — socket to logits, every kernel custom-written — the models it
+            serves, and the performance numbers.
+          </p>
         </a>
         <a class="card" href="/tools">
           <h3>The tools →</h3>
@@ -68,7 +82,10 @@
         </a>
         <a class="card" href="/deep-dives">
           <h3>A question becomes a program →</h3>
-          <p>The deep dive on the codegen flow: a frontier model writes code that runs on your data, never the data itself.</p>
+          <p>
+            The deep dive on the codegen flow: a frontier model writes code that runs on your data, never the data
+            itself.
+          </p>
         </a>
         <a class="card" href="/deep-dives/perplexity">
           <h3>Measuring quality →</h3>
@@ -105,83 +122,154 @@
       })();
     </script>
   </body>
+
+  <style is:global>
+    :root {
+      --bg-top: #284a5c;
+      --bg-bot: #122632;
+      --ink: #eaf1f6;
+      --muted: #9fb4c2;
+      --accent: #ff7a1c;
+      --accent-lite: #ffb05c;
+      --line: rgba(159, 180, 194, 0.18);
+      --card: rgba(255, 255, 255, 0.035);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+    html {
+      color-scheme: dark;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 600px at 50% -10%, rgba(255, 122, 28, 0.12), transparent 60%),
+        linear-gradient(180deg, var(--bg-top), var(--bg-bot));
+      background-attachment: fixed;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: var(--accent-lite);
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: clamp(2.5rem, 8vw, 5rem) 1.5rem 3rem;
+    }
+
+    .kicker {
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--accent-lite);
+    }
+    h1 {
+      font-size: clamp(2.6rem, 11vw, 4.5rem);
+      letter-spacing: -0.04em;
+      margin: 0.6rem 0 0;
+      font-weight: 700;
+      background: linear-gradient(180deg, #ffffff, #cedae6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .lede {
+      margin: 1.4rem 0 0;
+      color: var(--muted);
+      font-size: 1.2rem;
+      max-width: 46ch;
+    }
+    .lede strong {
+      color: var(--ink);
+    }
+
+    .cta {
+      margin-top: 2rem;
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-block;
+      padding: 0.6rem 1.2rem;
+      border-radius: 9px;
+      border: 1px solid var(--line);
+      color: var(--ink);
+      font-weight: 600;
+    }
+    .btn:hover {
+      text-decoration: none;
+      border-color: var(--accent-lite);
+    }
+    .btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #1a1205;
+    }
+    .btn.primary:hover {
+      background: var(--accent-lite);
+      border-color: var(--accent-lite);
+    }
+
+    .links {
+      margin-top: clamp(3rem, 8vw, 4.5rem);
+      display: grid;
+      gap: 0.9rem;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+    .card {
+      display: block;
+      padding: 1.1rem 1.2rem;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+    }
+    .card:hover {
+      text-decoration: none;
+      border-color: var(--accent-lite);
+    }
+    .card h3 {
+      margin: 0 0 0.3rem;
+      font-size: 1.05rem;
+    }
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    footer {
+      margin-top: clamp(3rem, 8vw, 5rem);
+      padding-top: 1.4rem;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    footer a {
+      color: var(--muted);
+    }
+    footer a:hover {
+      color: var(--accent-lite);
+    }
+    .dot {
+      margin: 0 0.5rem;
+      opacity: 0.5;
+    }
+  </style>
 </html>
-
-<style is:global>
-  :root {
-    --bg-top: #284a5c;
-    --bg-bot: #122632;
-    --ink: #eaf1f6;
-    --muted: #9fb4c2;
-    --accent: #ff7a1c;
-    --accent-lite: #ffb05c;
-    --line: rgba(159, 180, 194, 0.18);
-    --card: rgba(255, 255, 255, 0.035);
-  }
-
-  * { box-sizing: border-box; }
-  html { color-scheme: dark; scroll-behavior: smooth; }
-
-  body {
-    margin: 0;
-    min-height: 100vh;
-    color: var(--ink);
-    background:
-      radial-gradient(1200px 600px at 50% -10%, rgba(255, 122, 28, 0.12), transparent 60%),
-      linear-gradient(180deg, var(--bg-top), var(--bg-bot));
-    background-attachment: fixed;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto,
-      Helvetica, Arial, sans-serif;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  a { color: var(--accent-lite); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-
-  main { max-width: 760px; margin: 0 auto; padding: clamp(2.5rem, 8vw, 5rem) 1.5rem 3rem; }
-
-  .kicker {
-    text-transform: uppercase; letter-spacing: 0.1em;
-    font-size: 0.78rem; font-weight: 700; color: var(--accent-lite);
-  }
-  h1 {
-    font-size: clamp(2.6rem, 11vw, 4.5rem); letter-spacing: -0.04em;
-    margin: 0.6rem 0 0; font-weight: 700;
-    background: linear-gradient(180deg, #ffffff, #cedae6);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-  }
-  .lede { margin: 1.4rem 0 0; color: var(--muted); font-size: 1.2rem; max-width: 46ch; }
-  .lede strong { color: var(--ink); }
-
-  .cta { margin-top: 2rem; display: flex; gap: 0.8rem; flex-wrap: wrap; }
-  .btn {
-    display: inline-block; padding: 0.6rem 1.2rem; border-radius: 9px;
-    border: 1px solid var(--line); color: var(--ink); font-weight: 600;
-  }
-  .btn:hover { text-decoration: none; border-color: var(--accent-lite); }
-  .btn.primary { background: var(--accent); border-color: var(--accent); color: #1a1205; }
-  .btn.primary:hover { background: var(--accent-lite); border-color: var(--accent-lite); }
-
-  .links {
-    margin-top: clamp(3rem, 8vw, 4.5rem);
-    display: grid; gap: 0.9rem;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  }
-  .card {
-    display: block; padding: 1.1rem 1.2rem; border-radius: 12px;
-    border: 1px solid var(--line); background: var(--card); color: var(--ink);
-  }
-  .card:hover { text-decoration: none; border-color: var(--accent-lite); }
-  .card h3 { margin: 0 0 0.3rem; font-size: 1.05rem; }
-  .card p { margin: 0; color: var(--muted); font-size: 0.92rem; line-height: 1.5; }
-
-  footer {
-    margin-top: clamp(3rem, 8vw, 5rem); padding-top: 1.4rem;
-    border-top: 1px solid var(--line);
-    color: var(--muted); font-size: 0.9rem;
-  }
-  footer a { color: var(--muted); }
-  footer a:hover { color: var(--accent-lite); }
-  .dot { margin: 0 0.5rem; opacity: 0.5; }
-</style>
