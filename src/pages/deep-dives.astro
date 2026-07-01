@@ -180,6 +180,37 @@ def main() raises:
           on-device <code>ask_local</code> path <a href="#privacy-box">shown
           above</a>.
         </p>
+
+        <h3>AI rules — the fuzzy tail, materialized once</h3>
+        <p>
+          Some categories resist keywords. "Is this a gym?" can't be spelled as a
+          merchant list, so a category can instead be an <strong>AI rule</strong> —
+          a plain-English yes/no question the <em>on-device</em> model answers per
+          transaction. Write it with a <code>:</code> instead of an <code>=</code>:
+        </p>
+        <pre><code><span class="c"># an AI rule — &lt;tag&gt; : &lt;question&gt;, answered on-device</span>
+gym : is this a gym or fitness membership?</code></pre>
+        <p>
+          A model call per transaction is far too slow to run at query time, so an
+          AI rule is <strong>materialized once and cached</strong> into the same
+          <code>.tags</code> column the keyword rules write — after which "how much
+          on the gym" is the identical fast, exact filter. The tricky part is knowing
+          <em>what's already been computed</em>: millfolio keeps a tiny per-rule
+          <strong>completion marker</strong> keyed on a monotonic
+          <em>insertion generation</em> — so a back-dated statement you import months
+          later is correctly seen as new work, and a true negative ("not a gym") is
+          classified <strong>exactly once</strong>, never again. Add a rule, or a new
+          statement, and only the genuinely-new transactions are ever re-run.
+        </p>
+        <p>
+          It's incremental and observable: a <strong>materialization panel</strong>
+          in the Tags tab shows a per-rule progress bar, a ready/pending badge, and a
+          <em>Materialize now</em> button, and a between-questions worker chips away
+          in the background (pausable). Until a rule is fully materialized it's held
+          back from the model's tag vocabulary — so a half-computed <code>gym</code>
+          filter can never quietly report "$0 on the gym". The verdicts are computed
+          by the local model; nothing about them leaves the Mac.
+        </p>
       </section>
 
       <footer>
